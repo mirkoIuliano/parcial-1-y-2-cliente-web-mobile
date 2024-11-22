@@ -1,0 +1,4 @@
+/* en este orden ponemos 3 directivas */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
