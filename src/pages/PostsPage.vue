@@ -38,13 +38,32 @@ async function handleComment (id, user_name, user_comment )
     // una vez terminado se borran los campos
     newComment.value.user_name = ""
     newComment.value.user_comment = ""
+
+    // FIJARME DESPUÉS EN CASA
+     // Limpiamos los campos de comentario solo para el post correspondiente
+    //  const post = posts.value.find(post => post.id === id);
+    // post.commentsModel.user_name = "";
+    // post.commentsModel.user_comment = "";
 }
 
 // Cuando se monte el componente leemos los posteos de Firestore
-onMounted(async() => 
+onMounted(async() => {
+
+
     // llamamos a la función "subscribeToPublicPosts()" que sirve para recibir todos posteos de la base de datos
-    subscribeToPublicPosts(newPosts => posts.value = newPosts) // a subscribeToPublicPosts() hay que pasarle como parámetro una función callback
-) 
+    // subscribeToPublicPosts(newPosts => posts.value = newPosts) // a subscribeToPublicPosts() hay que pasarle como parámetro una función callback
+
+    subscribeToPublicPosts(newPosts => {
+        // Añadir un modelo de comentarios independiente para cada post
+        posts.value = newPosts.map(post => ({
+            ...post,
+            commentsModel: {
+                user_name: "",
+                user_comment: ""
+            }
+        }));
+    });
+}) 
 
 </script>
 
@@ -77,7 +96,6 @@ onMounted(async() =>
                 </div>
                 <p class="mr-4 font-semibold text-slate-500">@{{post.user_name}}</p>
             </div>
-            
 
             <div class="mb-5">
                 <p>{{post.review}}</p>
@@ -92,14 +110,14 @@ onMounted(async() =>
                     </li>
                 </ul>
                 
-                <form action="#" @submit.prevent="handleComment(post.id, newComment.user_name, newComment.user_comment)">
+                <form action="#" @submit.prevent="handleComment(post.id, post.commentsModel.user_name, post.commentsModel.user_comment)">
                     <div class="mt-5">
                         <label for="user_name" class="block sr-only">Usuario</label>
                         <input 
                             type="text" 
                             for="user_name"
                             class="px-4 py-1 border border-slate-300 rounded-md w-2/12 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                            v-model="newComment.user_name"
+                            v-model="post.commentsModel.user_name"
                             placeholder="@user_name"
                         >
                         <label for="user_comment" class="block sr-only">Comentar</label>
@@ -107,7 +125,7 @@ onMounted(async() =>
                             type="text" 
                             for="user_comment"
                             class="px-4 py-1 border border-slate-300 rounded-md ml-2 w-8/12 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                            v-model="newComment.user_comment"
+                            v-model="post.commentsModel.user_comment"
                             placeholder="Ingresar comentario..."
                         >
                         <button class="ml-2 bg-slate-800 text-white px-4 py-1 rounded-md font-medium text-base hover:bg-slate-700 transition-colors duration-200">Comentar</button>
