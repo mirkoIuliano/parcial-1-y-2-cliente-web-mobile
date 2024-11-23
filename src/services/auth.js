@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndP
 import { auth } from "./firebase";
 import { createUserProfile, getUserProfileByID, updateUserProfile } from "./user-profile";
 
-// creamos una variable donde vamos a obtener los datos del usuario autenticado (si es que existe)
+// Creamos una variable donde vamos a obtener los datos del usuario autenticado (si es que existe)
 let loggedUser = {
     id: null,
     email: null,
@@ -14,53 +14,58 @@ let loggedUser = {
     fullyLoaded: false,
 }
 
-
 // A penas se levanta la página preguntamos si el usuario figura como autenticado, en cuyo caso levantamos los datos
-if(localStorage.getItem('user')) // si en localStorage tenemos el dato 'user'
+if(localStorage.getItem('user')) // Si en localStorage tenemos el dato 'user'
 {
     // vamos a hacer que loggedUser sea igual a un JSON.parse de los datos que están en localStorage, 'user'
     loggedUser = JSON.parse(localStorage.getItem('user'))
 }
 
-// definimos un array de observers
+// Definimos un array de observers
 let observers = []
 
 // Nos "suscribimos" a los cambios de la autenticación
-onAuthStateChanged // onAuthStateChanged() recibe un callback que se ejecuta cada vez que hay un cambio en el estado de autenticación; en esencia: si paso de ser un usuario autenticado a uno no autenticado o al revés
-(auth, async user => {
-    if(user) {
-        // si existe user, seteamos los valores de loggedUser con los datos del usuario
-        console.log("Confirmando que el usuario está autenticado.")
-        // Actualizamos los datos locales de loggedUser, notificamos a los observers y guardamos los cambios del user en localStorage con la función updateLoggedUser()
-        updateLoggedUser ({ // le pasamos como parámetros un objeto con los datos nuevos del usuario
-            id: user.uid, //  En el usuario de Firebase Authentication, el id se llama 'uid' (unic id)
-            email: user.email, 
-            displayName: user.displayName, 
-        })
-
-        // Buscamos ahora el resto de datos del perfil. Estos otros datos se enceutnran en una collection, en el document respectivo del usuario
-        getUserProfileByID(user.uid)
-            .then(userProfile => { // userProfile es el objeto que recibimos como respuesta de la función getUserProfileByID
-
-                // Actualizamos los datos locales de loggedUser, notificamos a los observers y guardamos los cambios del user en localStorage con la función updateLoggedUser()
-                updateLoggedUser ({ // le pasamos como parámetros un objeto con los datos nuevos del usuario
-                    bio: userProfile.bio, // le agregamos la bio
-                    career: userProfile.career, // la carrera
-                    fullyLoaded: true, // y le cambiamos el fullyLoaded a true
-                })
-                
+onAuthStateChanged // onAuthStateChanged() recibe un callback que se ejecuta cada vez que hay un cambio en el estado de autenticación. En esencia, si paso de ser un usuario autenticado a uno no autenticado, o al revés, se va activar porque esto constituye un cambio de estado de autenticación
+(
+    auth, // el primer parámetro es la referencia a Authentication 
+    async user => { // el segundo parámetro es el callback que se va a ejecutar cada vez que ocurra un cambio en el estado de autenticación
+    /* CHATGPT => https://chatgpt.com/share/67412263-75e0-800b-b968-fef6aa30bce4
+    El callback que le pasas a onAuthStateChanged() se ejecuta cada vez que ocurre un cambio en el estado de autenticación.
+        - Si un usuario está autenticado, el callback recibe como argumento un objeto user con la información del usuario (ID, email, etc.).
+        - Si no hay un usuario autenticado, el callback recibe null.
+    */
+        if(user) {
+            // si existe user, seteamos los valores de loggedUser con los datos del usuario
+            console.log("Confirmando que el usuario está autenticado.")
+            // Actualizamos los datos locales de loggedUser, notificamos a los observers y guardamos los cambios del user en localStorage con la función updateLoggedUser()
+            updateLoggedUser ({ // le pasamos como parámetros un objeto con los datos nuevos del usuario
+                id: user.uid, //  En el usuario de Firebase Authentication, el id se llama 'uid' (unic id)
+                email: user.email, 
+                displayName: user.displayName, 
             })
 
-    } else {
-        // si user no existe, entonces los valores del loggedUser vuelven a ser todos nulos porque significa que no hay un usuario autenticado 
-        updateLoggedUser ({
-            id: null,
-            email: null,
-            displayName: null,
-            bio: null,
-            career: null,
-            fullyLoaded: false,
-        })
+            // Buscamos ahora el resto de datos del perfil. Estos otros datos se encuentran en una collection, en el document respectivo del usuario
+            getUserProfileByID(user.uid) // le pasamos el id del user, que como se dijo antes, en Firebase Authentication lo encontramos bajo el nombre 'uid'
+                .then(userProfile => { // userProfile es el objeto que recibimos como respuesta de la función getUserProfileByID
+                    // Actualizamos los datos locales de loggedUser, notificamos a los observers y guardamos los cambios del user en localStorage con la función updateLoggedUser()
+                    updateLoggedUser ({ // le pasamos como parámetros un objeto con los datos nuevos del usuario
+                        bio: userProfile.bio, // le agregamos la bio
+                        fullyLoaded: true, // y le cambiamos el fullyLoaded a true
+                    })
+                    
+                })
+
+        } else {
+            // si user no existe, entonces los valores del loggedUser vuelven a ser todos nulos porque significa que no hay un usuario autenticado 
+            updateLoggedUser ({
+                id: null,
+                email: null,
+                displayName: null,
+                bio: null,
+                career: null,
+                fullyLoaded: false,
+            }
+        )
     }
 })
 /* 
@@ -78,7 +83,7 @@ export async function register({email, password}) {
 
         // Primero nos registramos en Authentication
         const credentials = await createUserWithEmailAndPassword( // createUserWithEmailAndPassword() es como el signInWithEmailAndPassword
-            auth, //  le pasamos la autenticación 
+            auth, //  le pasamos la referencia al servicio de autenticación
             email, // el email
             password // y el password
         ) // createUserWithEmailAndPassword RETORNA las credenciales del usuario

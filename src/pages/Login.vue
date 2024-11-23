@@ -1,7 +1,9 @@
 <script setup>
 import { ref } from 'vue';
 import { login } from '../services/auth';
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 
 const user = ref({
     email: '',
@@ -19,7 +21,11 @@ async function handleSubmit(){
     } catch (error) {
         console.error("[Login.vue handleSubmit()] Error al autentificar: ", error)
     }
+    // si se logua correcatamente lo enviamos a la página de publicaciones
+    router.push('/mi-perfil')
 }
+
+
 
 </script>
 

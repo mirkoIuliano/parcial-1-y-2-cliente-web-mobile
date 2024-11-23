@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-// import { logout, subscribeToAuthChanges } from './services/auth';
+import { logout, subscribeToAuthChanges } from './services/auth';
 import { useRouter } from 'vue-router';
 
 // vamos a obtener la instancia del router usando la función useRouter
@@ -14,9 +14,7 @@ const loggedUser = ref ({
 
 
 onMounted(()=> {
-    // subscribeToAuthChanges(newUserData => loggedUser.value = newUserData)
-    // esto sería lo mismo que poner:
-    // subscribeToAuthChanges(function(newUserData) {loggedUser.value = newUserData})
+    subscribeToAuthChanges(newUserData => loggedUser.value = newUserData)
 })
     
 
