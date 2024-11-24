@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
+import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
 import { db } from "./firebase" // importamos la variable db que creamos en firebase. Esta es la referencia a la base y la necesitamos para poder escribir o leer datos de la base 
 import { arrayUnion, arrayRemove, updateDoc } from "firebase/firestore"
 import { auth } from "./firebase"
@@ -145,18 +145,18 @@ export async function getPostsByUserId(callback) {
         )
     }
 
-    // Obtenemos los posteos con getDocs
-    const snapshot = await getDocs(userPostsQuery);
-
-    const userPosts = snapshot.docs.map(doc => {
-        return {
-            id: doc.id,
-            user_name: doc.data().user_name || "",
-            book_title: doc.data().book_title || "",
-            review: doc.data().review || "",
-            comments: doc.data().comments || [], // si no tiene, devuelve un array vacío
-        }
+    // uso onSnapshot para que se actualice si alguien hace un nuevo comentario
+    onSnapshot(userPostsQuery, snapshot => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión
+        const userPosts = snapshot.docs.map(doc => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title y review
+            return {
+                id: doc.id,
+                user_name: doc.data().user_name || "",
+                book_title: doc.data().book_title || "",
+                review: doc.data().review || "",
+                comments: doc.data().comments || [], // si falta, devuelve un array vacío
+            }
+        })
+        callback(userPosts) // ejecutamos la función que recibimos como parámetro, pasándole los posteos ya transformados 
     })
 
-    callback(userPosts)
 }

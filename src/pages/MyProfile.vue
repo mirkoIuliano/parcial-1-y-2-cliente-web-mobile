@@ -33,11 +33,10 @@ onMounted(() => {
     });
 }) 
 
-async function handleComment (id, user_name, user_comment )
+async function handleComment (id, user_comment )
 {
     await addCommentToPost( id, 
         { 
-            user_name, 
             user_comment 
         }
     )
@@ -105,21 +104,21 @@ onUnmounted(() => {
             </li>
         </ul>
         
-        <form action="#" @submit.prevent="handleComment(post.id, post.commentsModel.user_name, post.commentsModel.user_comment)">
+        <form action="#" @submit.prevent="handleComment(post.id, post.commentsModel.user_comment)">
             <div class="mt-5">
-                <label for="user_name" class="block sr-only">Usuario</label>
+                <!-- <label for="user_name" class="block sr-only">Usuario</label>
                 <input 
                     type="text" 
                     for="user_name"
                     class="px-4 py-1 border border-slate-300 rounded-md w-2/12 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                     v-model="post.commentsModel.user_name"
                     placeholder="@user_name"
-                >
+                > -->
                 <label for="user_comment" class="block sr-only">Comentar</label>
                 <input 
                     type="text" 
                     for="user_comment"
-                    class="px-4 py-1 border border-slate-300 rounded-md ml-2 w-8/12 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                    class="px-4 py-1 border border-slate-300 rounded-md w-10/12 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                     v-model="post.commentsModel.user_comment"
                     placeholder="Ingresar comentario..."
                 >

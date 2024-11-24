@@ -1,6 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import {savePulicPost, subscribeToPublicPosts, addCommentToPost} from '../services/public-posts'
+import { isAuthenticated } from '../services/auth';
+import { useRouter } from 'vue-router';
 
 
 // dentro de esta variable vamos a guardar todos los registros (osea todos los posteos) de la base de datos
@@ -26,24 +28,35 @@ const newComment = ref({
     user_comment: "",
 })
 
+const router = useRouter(); 
+
 async function handleComment (id, user_comment )
 {
-    await addCommentToPost( id, 
-        { 
-            // user_name, 
-            user_comment 
-        }
-    )
+
+    if (!isAuthenticated()){
+        alert("Para comentar es necesario iniciar sesión primero")
+        router.push('/iniciar-sesion')
+    } else {
+        
+        await addCommentToPost( id, 
+            { 
+                // user_name, 
+                user_comment 
+            }
+        )
+
+    }
+
 
     // una vez terminado se borran los campos
-    newComment.value.user_name = ""
-    newComment.value.user_comment = ""
+    // newComment.value.user_name = ""
+    // newComment.value.user_comment = ""
 
     // FIJARME DESPUÉS EN CASA
      // Limpiamos los campos de comentario solo para el post correspondiente
-    //  const post = posts.value.find(post => post.id === id);
-    // post.commentsModel.user_name = "";
-    // post.commentsModel.user_comment = "";
+    const post = posts.value.find(post => post.id === id);
+    post.commentsModel.user_name = "";
+    post.commentsModel.user_comment = "";
 }
 
 // Cuando se monte el componente leemos los posteos de Firestore
