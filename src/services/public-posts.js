@@ -88,6 +88,8 @@ export async function subscribeToPublicPosts(callback) // va a recibir un callba
 // Función para agregar un comentario al post
 export async function addCommentToPost(postId, comment) 
 {
+    const user = auth.currentUser
+    
     // postRef va a tener la referencia al documento de la publicación específica
     const postRef = doc(db, 'public-posts', postId); // usamos doc para poder buscar en la collection 'public.posts' el documento específico al cual se le está agregando un comentario
     // usamos updateDoc para editar el documento 
@@ -96,6 +98,7 @@ export async function addCommentToPost(postId, comment)
             comments: arrayUnion( // uso la función arrayUnion() para agregar datos al array comments, que está dentro de nuestro docuemento del post
                 { 
                     ...comment,
+                    user_name: user.displayName
                     // created_at: serverTimestamp()  // le agrego el momento en que se creó ese comentario
                 }
             ) 
