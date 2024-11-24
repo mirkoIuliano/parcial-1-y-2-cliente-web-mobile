@@ -1,6 +1,9 @@
-import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp } from "firebase/firestore"
+import { addDoc, collection, doc, getDocs, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
 import { db } from "./firebase" // importamos la variable db que creamos en firebase. Esta es la referencia a la base y la necesitamos para poder escribir o leer datos de la base 
 import { arrayUnion, arrayRemove, updateDoc } from "firebase/firestore"
+import { auth } from "./firebase"
+
+
 /**
  * Graba un posteo en la base de datos.
  * 
@@ -9,8 +12,17 @@ import { arrayUnion, arrayRemove, updateDoc } from "firebase/firestore"
  * 
  */
 // Función para guardar posteos nuevos
-export async function savePulicPost({user_name, book_title, review}) 
+export async function savePulicPost({book_title, review}) 
 {
+    // Obtenemos al usuario autenticado
+    const user = auth.currentUser
+    // Validamos de que exista tal usuario
+    if (!user) {
+        console.error("[public-posts.js savePublicPost] No hay un usuario autenticado. ", error)
+        throw error
+    }
+
+
     // Escribimos en Firestore
     // Para interactuar con una collection o document de Firestore es necesario definir una referencia a dicha collection o document
     // Para las collection usamos la función "collection"
@@ -22,7 +34,8 @@ export async function savePulicPost({user_name, book_title, review})
     // Este método retorna una promesa que se resuelve cuando termina de escrbir (cuando se confirma que se grabó) (En este caso que vamos a hacer no nos va a servir la promesa, pero quizá en un futuro sí)
     await addDoc(publicPostsRef, // le pasamos la referencia a la collection de las publicaciones (publicPostsRef)
         {   // le pasamos como segundo parámetro un objeto que contenga los datos del posteo
-            user_name, 
+            user_id: user.uid,
+            user_name: user.displayName || "Usuario sin user name", // en caso de no tener user name pone eso 
             book_title,
             review,
             comments: [],
@@ -88,4 +101,59 @@ export async function addCommentToPost(postId, comment)
             ) 
         }
     );
+}
+
+
+export async function getPostsByUserId(callback) {
+
+    let loggedUser = {
+        id: null
+    }
+    if (localStorage.getItem('user')){
+        loggedUser = JSON.parse(localStorage.getItem('user'))
+    }
+
+    // Para leer los documentos de la collection "public-posts" empezamos por crear la referencia
+    const publicPostsRef = collection(db, 'public-posts')
+
+    // Obtenemos al usuario autenticado
+    const user = auth.currentUser
+    
+    let userPostsQuery
+    /* 
+    Todo este if() lo hice porque si refreseheaba la página leía user.uid como null porque todavía ese proceso de Authentication no estaba realizado
+    Lo que hice fue buscar el user en el localStorage y si existe usar ese en vez del user traído con auth.currentUser
+    */
+    if (user && user.uid) {
+        // Crear una consulta para filtrar publicaciones por el campo `user_id`
+        userPostsQuery = query(
+            publicPostsRef,
+            // orderBy('created_at', 'desc'), // Ordenamos por fecha de creación descendente
+            // Filtro para obtener solo las publicaciones del usuario autenticado
+            where('user_id', '==', user.uid)
+        )
+    } else {
+        // Crear una consulta para filtrar publicaciones por el campo `user_id`
+        userPostsQuery = query(
+            publicPostsRef,
+            // orderBy('created_at', 'desc'), // Ordenamos por fecha de creación descendente
+            // Filtro para obtener solo las publicaciones del usuario autenticado
+            where('user_id', '==', loggedUser.id)
+        )
+    }
+
+    // Obtenemos los posteos con getDocs
+    const snapshot = await getDocs(userPostsQuery);
+
+    const userPosts = snapshot.docs.map(doc => {
+        return {
+            id: doc.id,
+            user_name: doc.data().user_name || "",
+            book_title: doc.data().book_title || "",
+            review: doc.data().review || "",
+            comments: doc.data().comments || [], // si no tiene, devuelve un array vacío
+        }
+    })
+
+    callback(userPosts)
 }

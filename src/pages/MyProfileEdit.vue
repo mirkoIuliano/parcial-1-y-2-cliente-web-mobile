@@ -10,7 +10,6 @@ const loading = ref(false)
 const editData = ref({
     displayName: '',
     bio: '',
-    career: '',
 })
 
 const handleSubmit = async () => {
@@ -31,8 +30,7 @@ onMounted(()=> {
     unsubscribeFromAuth = subscribeToAuthChanges(
         newUserData => editData.value = {
             displayName : newUserData.displayName || '', // este (|| '') lo puso en clase 8 min 41:30. 
-            bio : newUserData.bio || '', // esto sirve para que, si no existe la bio, la career o el displayName, en vez de quedar como undefined queden como ''
-            career : newUserData.career || '',
+            bio : newUserData.bio || '', // esto sirve para que, si no existe la bio o el displayName, en vez de quedar como undefined queden como ''
         })
     // subscribeToAuthChanges retorna como resultado una función para cancelar la suscripción. Esta función se va a guardar en unsubscribeFromAuth, osea que dentro de unsubscribeFromAuth va a tener la función para desuscrirse 
 })
@@ -74,16 +72,6 @@ onUnmounted(() => {
             (class="read-only:bg-gray-200"):
                 - read-only es un modificador de Tailwind, que hace que cuando el campo esté como 'readonly' le agregamos ese color de fondo
         -->
-    </div>
-    <div class="mb-4">
-        <label for="career" class="block mb-2">Carrera</label>
-        <input 
-            type="text" 
-            id="career" 
-            class="p-2 w-full border rounded read-only:bg-gray-200"
-            :readonly="loading"
-            v-model="editData.career"
-        >
     </div>
 
     <button type="submit">

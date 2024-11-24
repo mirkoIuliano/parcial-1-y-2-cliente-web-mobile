@@ -26,7 +26,7 @@ const posts = ref(
 
 // esta variable va a capturar los datos de los inputs
 const newPost = ref({
-    user_name: '',
+    // user_name: '',
     book_title: '',
     review: '',
 })
@@ -66,7 +66,7 @@ function handleSubmit(){
     @submit.prevent="handleSubmit"
     class="w-2/4 border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8"
     >
-        <div class="mb-5">
+        <!-- <div class="mb-5">
             <label for="user_name" class="block mb-2 text-lg font-semibold text-slate-700">Nombre de Usuario</label>
             <input 
                 type="text" 
@@ -75,7 +75,7 @@ function handleSubmit(){
                 placeholder="Ingresa el título del libro"
                 v-model="newPost.user_name"
             >
-        </div>
+        </div> -->
 
         <div class="mb-5">
             <label for="book_title" class="block mb-2 text-lg font-semibold text-slate-700">Título del Libro</label>
