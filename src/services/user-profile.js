@@ -69,3 +69,39 @@ export async function createUserProfile(id, {email}) {
         {email} // y le pasamos la data que le queremos guardar
     ) 
 }
+
+// export async function getUserNameByUserId(id) {
+//     const profileRef = doc(db, `/users/${id}`)
+//     const profileSnapshot = await getDoc(profileRef) 
+//     const data = profileSnapshot.data()
+//     return data.displayName
+// }
+
+// Función para obtener el displayName de un usuario por su ID
+export async function getDisplayNameByUserId(id) {
+    const profileRef = doc(db, `/users/${id}`);
+    const profileSnapshot = await getDoc(profileRef);
+    return profileSnapshot.exists() ? profileSnapshot.data().displayName : "Usuario desconocido";
+}
+
+// export async function getUserNameByUserId(id) {
+//     try {
+//         const profileRef = doc(db, `/users/${id}`);
+//         const profileSnapshot = await getDoc(profileRef);
+        
+//         if (!profileSnapshot.exists()) {
+//             throw new Error(`No se encontró un usuario con el id: ${id}`);
+//         }
+
+//         const data = profileSnapshot.data();
+        
+//         if (!data.displayName) {
+//             throw new Error(`El documento con id ${id} no contiene la propiedad 'displayName'.`);
+//         }
+
+//         return data.displayName;
+//     } catch (error) {
+//         console.error("Error obteniendo el nombre del usuario:", error.message);
+//         return null; // Retorna null para evitar romper la UI
+//     }
+// }

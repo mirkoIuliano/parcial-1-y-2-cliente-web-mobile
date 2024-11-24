@@ -3,6 +3,7 @@ import { db } from "./firebase" // importamos la variable db que creamos en fire
 import { arrayUnion, arrayRemove, updateDoc } from "firebase/firestore"
 import { auth } from "./firebase"
 import { getAuthenticatedUser } from "./auth"
+import { getDisplayNameByUserId } from "./user-profile"
 
 
 /**
@@ -71,16 +72,20 @@ export async function subscribeToPublicPosts(callback) // va a recibir un callba
     // Para hacer la lectura en tiempo real usamos la función "onSnapshot()". onSnapshot se ejecuta cada vez que haya cambios en la base de datos
     // Esta función recibe 2 argumentos:
     // 1. La referencia de la collection o una query  2. El callback a ejecutar cada vez que haya cambios en la base de datos. Este callback recibe como parámetro el QuerySnapshot
-    onSnapshot(postsQuery, snapshot => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión
-        const newPosts = snapshot.docs.map(doc => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title y review
-            return {
-                id: doc.id,
-                user_name: doc.data().user_name || "",
-                book_title: doc.data().book_title || "",
-                review: doc.data().review || "",
-                comments: doc.data().comments || [], // si falta, devuelve un array vacío
-            }
-        })
+    onSnapshot(postsQuery, async (snapshot) => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión
+        const newPosts = await Promise.all ( // como necesitamos llamar a la función asíncrona getDisplayNameByUserId() para obtener el displayName, usamos Promise.all() para esperar a que todas las promesas de getDisplayNameByUserId se resuelvan antes de pasar los datos al callback
+            snapshot.docs.map(async (doc) => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title, review, displayName, etc
+                const displayName = await getDisplayNameByUserId(doc.data().user_id) // getDisplayNameByUserId() es una función de [user-profile.js] que sirve para obtener el nombre de usuario (displayName) de manera dinámica. Sin esta función, si guardamos user_name: doc.data().user_name, va a quedar estático y si se cambia el nombre va a seguir el nombre anterior en vez del actualziado
+                return {
+                    id: doc.id,
+                    user_name: displayName || "", // usamos displayName, que es el nombre dinámico
+                    book_title: doc.data().book_title || "",
+                    review: doc.data().review || "",
+                    comments: doc.data().comments || [], // si falta, devuelve un array vacío
+                    // user_id: doc.data().user_id
+                }
+            })
+        ) 
         callback(newPosts) // ejecutamos la función que recibimos como parámetro, pasándole los posteos ya transformados 
     })
     
@@ -143,16 +148,20 @@ export async function getPostsByUserId(callback) {
     } 
 
     // uso onSnapshot para que se actualice si alguien hace un nuevo comentario
-    onSnapshot(userPostsQuery, snapshot => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión
-        const userPosts = snapshot.docs.map(doc => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title y review
-            return {
-                id: doc.id,
-                user_name: doc.data().user_name || "",
-                book_title: doc.data().book_title || "",
-                review: doc.data().review || "",
-                comments: doc.data().comments || [], // si falta, devuelve un array vacío
-            }
-        })
+    onSnapshot(userPostsQuery, async (snapshot) => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión
+        const userPosts = await Promise.all( // como necesitamos llamar a la función asíncrona getDisplayNameByUserId() para obtener el displayName, usamos Promise.all() para esperar a que todas las promesas de getDisplayNameByUserId se resuelvan antes de pasar los datos al callback
+            snapshot.docs.map(async (doc) => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title y review
+                const displayName = await getDisplayNameByUserId(doc.data().user_id) // getDisplayNameByUserId() es una función de [user-profile.js] que sirve para obtener el nombre de usuario (displayName) de manera dinámica. Sin esta función, si guardamos user_name: doc.data().user_name, va a quedar estático y si se cambia el nombre va a seguir el nombre anterior en vez del actualziado
+                return {
+                    id: doc.id,
+                    user_name: displayName, // usamos displayName, que es el nombre dinámico
+                    book_title: doc.data().book_title || "",
+                    review: doc.data().review || "",
+                    comments: doc.data().comments || [], // si falta, devuelve un array vacío
+                    // user_id: doc.data().user_id
+                }
+            })
+        ) 
         callback(userPosts) // ejecutamos la función que recibimos como parámetro, pasándole los posteos ya transformados 
     })
 
