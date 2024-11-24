@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import {savePulicPost, subscribeToPublicPosts, addCommentToPost} from '../services/public-posts'
 import { useRouter } from 'vue-router';
 import { auth } from '../services/firebase';
+import { getDisplayNameByUserId } from '../services/user-profile';
 
 
 // dentro de esta variable vamos a guardar todos los registros (osea todos los posteos) de la base de datos
@@ -23,10 +24,10 @@ const posts = ref(
     ]
 ) */
 
-const newComment = ref({
-    user_name: "",
-    user_comment: "",
-})
+// const newComment = ref({
+//     user_name: "",
+//     user_comment: "",
+// })
 
 const router = useRouter(); 
 
@@ -35,11 +36,13 @@ async function handleComment (id, user_comment )
     // uso auth.currentUser para saber si hay o no un usuario autenticado 
     if (auth.currentUser){
         await addCommentToPost( id, 
-            {
-                user_comment 
-            }
-        )
-    } else {
+        {
+            user_comment,
+            comment_user_id: auth.currentUser.uid
+            // console.log(auth.currentUser.uid)
+        }
+    )
+} else {
         alert("Para comentar es necesario iniciar sesión primero")
         router.push('/iniciar-sesion')
     }
@@ -52,27 +55,74 @@ async function handleComment (id, user_comment )
     // FIJARME DESPUÉS EN CASA
      // Limpiamos los campos de comentario solo para el post correspondiente
     const post = posts.value.find(post => post.id === id);
-    post.commentsModel.user_name = "";
+    // post.commentsModel.user_name = "";
     post.commentsModel.user_comment = "";
 }
 
 // Cuando se monte el componente leemos los posteos de Firestore
-onMounted(async() => {
+onMounted( async () => {
 
 
-    // llamamos a la función "subscribeToPublicPosts()" que sirve para recibir todos posteos de la base de datos
-    // subscribeToPublicPosts(newPosts => posts.value = newPosts) // a subscribeToPublicPosts() hay que pasarle como parámetro una función callback
+    // llamamos a la función "subscribeToPublicPosts()" que sirve para recibir todos los posteos de la base de datos
+    subscribeToPublicPosts( async (newPosts) => { // newPosts es una lista con todas las publicaciones
+        
+        // al array posts le vamos a agregar lo siguiente
+        posts.value = await Promise.all( 
+            
+            newPosts.map(async (post) => { // hacemos un .map() de la lista de publicaciones
+                const resolvedComments  = await Promise.all( // creamos una const "resolvedComments" que va a contenter todos los comentarios ya existentes del documento
+                    post.comments.map(async (comment) => { // post (que sería uno de los docuemntos de 'newPosts') tiene un atributo comments, que es un array de comentarios. Vamos a hacer un .map() de este array y a cada ciomentario vamos a ponerle un user_name usando getDisplayNameByUserId()
 
-    subscribeToPublicPosts(newPosts => {
-        // Añadir un modelo de comentarios independiente para cada post
-        posts.value = newPosts.map(post => ({
-            ...post,
-            commentsModel: {
-                user_name: "",
-                user_comment: ""
-            }
-        }));
-    });
+                        const displayName = await getDisplayNameByUserId(comment.comment_user_id) // con getDisplayNameByUserId() hacemos que el user_name sea dinámico. Si guardasemos el atributo user_name al hacer el comentario, éste quedaría siempre igual y si el usuario que hizo el comentario cambia su user_name en el comentario seguiría apareciendo el user_name viejo
+                    
+                        return { // retornamos el contenido de los comentarios y el user_name dinámico
+                            ...comment,
+                            user_name: displayName, // Agregamos el nombre del usuario dinámicamente
+                        }
+                    })
+                ) // acá termina resolvedComments
+
+                // una vez terminado el mapeo de resolvedComments podemos cargar en posts.value un objeto con los siguientes datos
+                return { 
+                    ...post, // todo lo que contenga el documento (book_title, created_at, review)
+                    comments: resolvedComments, // sobreescribimos 'comments' con los comentarios ya existentes con los user_name hechos dinámicamente
+                    commentsModel: { // y creamos un objeto commentsModel que nos va a servir después para manejar los nuevos comentarios
+                        user_comment: "",
+                    }
+                    /*  commentsModel más explayado:
+                        Como estamos realizando todo esto dentro de onMounted(), cuando se monta el DOM se va a ejecutar todas estas cosas y entre ellas se va a agregar el objeto commentsModels que CREO que sería algo así:
+                        posts = [
+                            {
+                                book_title: "El Héroe de las Eras",
+                                comments: [
+                                    {
+                                        comment_user_id"enpbrHIijzYqrl3dqDlhv6iPUnJ3",
+                                        user_comment"si?"
+                                    },
+                                    {
+                                        comment_user_id"xcqnYE8hnEWDPfIZphx5tHF58z03",
+                                        user_comment"Así es"
+                                    },
+                                ],
+                                created_at 24 de noviembre de 2024, 3:13:15 p.m. UTC-3 ,
+                                review: "lorem...",
+                                user_id"kkAsUueEouZ7EJf4pydrTiM5R0C3",
+                                user_name"Kirmodericofederico",
+                                commentsModel: {
+                                    user_comment: ""
+                                }
+                            }
+                        ]
+
+                        Este commentsModel siempre va a iniciar vacío y se va a llenar con lo que pongamos en los inputs (hay v.model="post.commentsModel.user_comment")
+                        Para esto lo creamos
+                        Después se pasa por parámetro este 'post.commentsModel.user_comment' a la función handleComment(), en donde se usa para agregar el nuevo comentario al ya existente array 'comments'
+                        
+                    */
+                }
+            })
+        )
+    })
 }) 
 
 </script>

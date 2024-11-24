@@ -70,38 +70,11 @@ export async function createUserProfile(id, {email}) {
     ) 
 }
 
-// export async function getUserNameByUserId(id) {
-//     const profileRef = doc(db, `/users/${id}`)
-//     const profileSnapshot = await getDoc(profileRef) 
-//     const data = profileSnapshot.data()
-//     return data.displayName
-// }
 
-// Función para obtener el displayName de un usuario por su ID
+// Función para obtener el displayName de un usuario por su ID. La utilizo para poder poner los user_name de manera dinámica, cosa que si el usuario lo actualiza, se va a cambiar también en los posts que haya realizado y en los comentarios también
 export async function getDisplayNameByUserId(id) {
-    const profileRef = doc(db, `/users/${id}`);
-    const profileSnapshot = await getDoc(profileRef);
-    return profileSnapshot.exists() ? profileSnapshot.data().displayName : "Usuario desconocido";
+    const profileRef = doc(db, `/users/${id}`)
+    const profileSnapshot = await getDoc(profileRef)
+    // si no tiene displayName ponemos el email y en caso contrario el displayName
+    return profileSnapshot.data().displayName && profileSnapshot.data().displayName !== "" ? profileSnapshot.data().displayName : profileSnapshot.data().email
 }
-
-// export async function getUserNameByUserId(id) {
-//     try {
-//         const profileRef = doc(db, `/users/${id}`);
-//         const profileSnapshot = await getDoc(profileRef);
-        
-//         if (!profileSnapshot.exists()) {
-//             throw new Error(`No se encontró un usuario con el id: ${id}`);
-//         }
-
-//         const data = profileSnapshot.data();
-        
-//         if (!data.displayName) {
-//             throw new Error(`El documento con id ${id} no contiene la propiedad 'displayName'.`);
-//         }
-
-//         return data.displayName;
-//     } catch (error) {
-//         console.error("Error obteniendo el nombre del usuario:", error.message);
-//         return null; // Retorna null para evitar romper la UI
-//     }
-// }
