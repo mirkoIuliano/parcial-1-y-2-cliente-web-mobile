@@ -2,6 +2,7 @@ import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, w
 import { db } from "./firebase" // importamos la variable db que creamos en firebase. Esta es la referencia a la base y la necesitamos para poder escribir o leer datos de la base 
 import { arrayUnion, arrayRemove, updateDoc } from "firebase/firestore"
 import { auth } from "./firebase"
+import { getAuthenticatedUser } from "./auth"
 
 
 /**
@@ -109,6 +110,8 @@ export async function addCommentToPost(postId, comment)
 
 export async function getPostsByUserId(callback) {
 
+    let userPostsQuery
+
     let loggedUser = {
         id: null
     }
@@ -116,34 +119,28 @@ export async function getPostsByUserId(callback) {
         loggedUser = JSON.parse(localStorage.getItem('user'))
     }
 
+
     // Para leer los documentos de la collection "public-posts" empezamos por crear la referencia
     const publicPostsRef = collection(db, 'public-posts')
 
-    // Obtenemos al usuario autenticado
-    const user = auth.currentUser
-    
-    let userPostsQuery
-    /* 
-    Todo este if() lo hice porque si refreseheaba la página leía user.uid como null porque todavía ese proceso de Authentication no estaba realizado
-    Lo que hice fue buscar el user en el localStorage y si existe usar ese en vez del user traído con auth.currentUser
+
+    const user = getAuthenticatedUser()
+    /*
+    Uso getAuthenticatedUser() en vez de hacer ==> const user = auth.currentUser;
+    Porque si lo hago así, cuando entro a la página user va a ser null porque tarda en cargar todo lo de Authentication. Como es null, después en el if(user){...} no funciona
+    Si quiero ver, comentar el getAuthenticatedUser y poner la otra opción.
+    Tampoco funciona si pongo ==> const user = await auth.currentUser;
     */
-    if (user && user.uid) {
-        // Crear una consulta para filtrar publicaciones por el campo `user_id`
+    if(user){
+        // console.log("hay un usuario autenticado")
+        // console.log(user)
         userPostsQuery = query(
             publicPostsRef,
-            // orderBy('created_at', 'desc'), // Ordenamos por fecha de creación descendente
+            orderBy('created_at', 'desc'), // Ordenamos por fecha de creación descendente
             // Filtro para obtener solo las publicaciones del usuario autenticado
-            where('user_id', '==', user.uid)
+            where('user_id', '==', user.id)
         )
-    } else {
-        // Crear una consulta para filtrar publicaciones por el campo `user_id`
-        userPostsQuery = query(
-            publicPostsRef,
-            // orderBy('created_at', 'desc'), // Ordenamos por fecha de creación descendente
-            // Filtro para obtener solo las publicaciones del usuario autenticado
-            where('user_id', '==', loggedUser.id)
-        )
-    }
+    } 
 
     // uso onSnapshot para que se actualice si alguien hace un nuevo comentario
     onSnapshot(userPostsQuery, snapshot => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión

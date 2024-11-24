@@ -177,8 +177,8 @@ export async function logout() {
 }
 
 // función para verificar si el usuario está autenticado
-export function isAuthenticated() {
-    return loggedUser.id !== null;
+export function getAuthenticatedUser() {
+    return loggedUser;
 }
 
 

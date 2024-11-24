@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import {savePulicPost, subscribeToPublicPosts, addCommentToPost} from '../services/public-posts'
-import { isAuthenticated } from '../services/auth';
 import { useRouter } from 'vue-router';
+import { auth } from '../services/firebase';
 
 
 // dentro de esta variable vamos a guardar todos los registros (osea todos los posteos) de la base de datos
@@ -32,19 +32,16 @@ const router = useRouter();
 
 async function handleComment (id, user_comment )
 {
-
-    if (!isAuthenticated()){
-        alert("Para comentar es necesario iniciar sesión primero")
-        router.push('/iniciar-sesion')
-    } else {
-        
+    // uso auth.currentUser para saber si hay o no un usuario autenticado 
+    if (auth.currentUser){
         await addCommentToPost( id, 
-            { 
-                // user_name, 
+            {
                 user_comment 
             }
         )
-
+    } else {
+        alert("Para comentar es necesario iniciar sesión primero")
+        router.push('/iniciar-sesion')
     }
 
 
