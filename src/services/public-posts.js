@@ -117,12 +117,12 @@ export async function getPostsByUserId(callback) {
 
     let userPostsQuery
 
-    let loggedUser = {
-        id: null
-    }
-    if (localStorage.getItem('user')){
-        loggedUser = JSON.parse(localStorage.getItem('user'))
-    }
+    // let loggedUser = {
+    //     id: null
+    // }
+    // if (localStorage.getItem('user')){
+    //     loggedUser = JSON.parse(localStorage.getItem('user'))
+    // }
 
 
     // Para leer los documentos de la collection "public-posts" empezamos por crear la referencia
@@ -145,7 +145,9 @@ export async function getPostsByUserId(callback) {
             // Filtro para obtener solo las publicaciones del usuario autenticado
             where('user_id', '==', user.id)
         )
-    } 
+    } else {
+        // TODO: manejar error
+    }
 
     // uso onSnapshot para que se actualice si alguien hace un nuevo comentario
     onSnapshot(userPostsQuery, async (snapshot) => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión

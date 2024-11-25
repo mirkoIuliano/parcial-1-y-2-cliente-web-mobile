@@ -74,6 +74,7 @@ onMounted( async () => {
                     post.comments.map(async (comment) => { // post (que sería uno de los docuemntos de 'newPosts') tiene un atributo comments, que es un array de comentarios. Vamos a hacer un .map() de este array y a cada ciomentario vamos a ponerle un user_name usando getDisplayNameByUserId()
 
                         const displayName = await getDisplayNameByUserId(comment.comment_user_id) // con getDisplayNameByUserId() hacemos que el user_name sea dinámico. Si guardasemos el atributo user_name al hacer el comentario, éste quedaría siempre igual y si el usuario que hizo el comentario cambia su user_name en el comentario seguiría apareciendo el user_name viejo
+                        // Dentro de comments[] está el contenido del comentario (user_comment) y el id (comment_user_id) de la persona que lo hizo. getDisplayNameByUserId() se encarga de transformar ese id en el user_name
                     
                         return { // retornamos el contenido de los comentarios y el user_name dinámico
                             ...comment,

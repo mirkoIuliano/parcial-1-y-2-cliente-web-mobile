@@ -2,6 +2,8 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { subscribeToAuthChanges } from '../services/auth';
 import { addCommentToPost, getPostsByUserId } from '../services/public-posts';
+import { auth } from '../services/firebase';
+import { getDisplayNameByUserId } from '../services/user-profile';
 
 // creamos "unsubscribeFromAuth" y la definimos como una función vacía (porque después vamos a igual "unsubscribeFromAuth" a una función)
 let unsubscribeFromAuth = () => {}
@@ -11,7 +13,6 @@ const loggedUser = ref({
     email: null,
     displayName: null,
     bio: null,
-    career: null,
 })
 
 const posts = ref([])
@@ -21,34 +22,48 @@ onMounted(() => {
     unsubscribeFromAuth = subscribeToAuthChanges(newUserData => loggedUser.value = newUserData)
     // subscribeToAuthChanges retorna como resultado una función para cancelar la suscripción. Esta función se va a guardar en unsubscribeFromAuth, osea que dentro de unsubscribeFromAuth va a tener la función para desuscrirse 
 
-    getPostsByUserId(userPosts => {
-        // Añadir un modelo de comentarios independiente para cada post
-        posts.value = userPosts.map(userPost => ({
-            ...userPost,
-            commentsModel: {
-                user_name: "",
-                user_comment: ""
-            }
-        }));
-    });
+    getPostsByUserId(async (userPosts) => {
+        // al array posts le vamos a agregar lo siguiente
+        posts.value = await Promise.all(
+            userPosts.map(async (userPost) => {
+                const resolvedComments  = await Promise.all(
+                    userPost.comments.map(async (comment) => {
+                        const displayName = await getDisplayNameByUserId(comment.comment_user_id)
+                        return{
+                            ...comment,
+                            user_name: displayName,
+                        }
+                    })
+                )
+                return {
+                    ...userPost,
+                    comments: resolvedComments,
+                    commentsModel: {
+                        user_comment: ""
+                    }
+                }
+            })
+        )
+    })
 }) 
 
 async function handleComment (id, user_comment )
 {
-    await addCommentToPost( id, 
-        { 
-            user_comment 
+    // uso auth.currentUser para saber si hay o no un usuario autenticado 
+    if (auth.currentUser){
+        await addCommentToPost( id, 
+        {
+            user_comment,
+            comment_user_id: auth.currentUser.uid
         }
     )
+} else {
+        alert("Para comentar es necesario iniciar sesión primero")
+        router.push('/iniciar-sesion')
+    }
 
-    // una vez terminado se borran los campos
-    // newComment.value.user_name = ""
-    // newComment.value.user_comment = ""
-
-    // FIJARME DESPUÉS EN CASA
-    // Limpiamos los campos de comentario solo para el post correspondiente
+     // Limpiamos los campos de comentario solo para el post correspondiente
     const post = posts.value.find(post => post.id === id);
-    post.commentsModel.user_name = "";
     post.commentsModel.user_comment = "";
 }
 
@@ -106,14 +121,6 @@ onUnmounted(() => {
         
         <form action="#" @submit.prevent="handleComment(post.id, post.commentsModel.user_comment)">
             <div class="mt-5">
-                <!-- <label for="user_name" class="block sr-only">Usuario</label>
-                <input 
-                    type="text" 
-                    for="user_name"
-                    class="px-4 py-1 border border-slate-300 rounded-md w-2/12 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                    v-model="post.commentsModel.user_name"
-                    placeholder="@user_name"
-                > -->
                 <label for="user_comment" class="block sr-only">Comentar</label>
                 <input 
                     type="text" 
