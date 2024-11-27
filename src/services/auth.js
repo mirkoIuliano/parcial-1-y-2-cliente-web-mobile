@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndP
 import { auth } from "./firebase";
 import { createUserProfile, getUserProfileByID, updateUserProfile } from "./user-profile";
 
-// Creamos una variable donde vamos a obtener los datos del usuario autenticado (si es que existe)
+// Creamos una variable donde vamos a tenre los datos del usuario autenticado (si es que existe)
 let loggedUser = {
     id: null,
     email: null,
@@ -24,31 +24,46 @@ if(localStorage.getItem('user')) // Si en localStorage tenemos el dato 'user'
 // Definimos un array de observers
 let observers = []
 
-// Nos "suscribimos" a los cambios de la autenticación
-onAuthStateChanged // onAuthStateChanged() recibe un callback que se ejecuta cada vez que hay un cambio en el estado de autenticación. En esencia, si paso de ser un usuario autenticado a uno no autenticado, o al revés, se va activar porque esto constituye un cambio de estado de autenticación
+
+// Nos "suscribimos" a los cambios de la autenticación con onAuthStateChanged()
+/* 
+Cuando la página carga, onAuthStateChanged() revisa si hay un usuario autenticado y "escucha" cambios en el estado de autenticación
+Si el usuario inicia/cierra sesión, esta función:
+    - Actualiza los datos locales (loggedUser) con la información del usuario o los reinicia a null
+    - Busca información adicional del perfil (como biografía o carrera) en Firestore, si el usuario está autenticado
+    - Notifica a los observers
+*/
+/* 
+Dato: onAuthStateChanged() queda "suelto" en la raíz del proyecto y esto hace que cada vez que alguien importe este archivo [auth.js] se ejecuta automáticamente onAuthStateChanged()
+    Tan pronto alguien importa este módulo para usar cualquiera de sus funciones, ya le dejamos especificado que vamos a necesitar suscribirnos a la autenticación de Firebase
+    Clase 7 (27 de sep), min 36:00 dijo esto 
+*/
+onAuthStateChanged // onAuthStateChanged() recibe un callback como parámetro, que se ejecuta cada vez que haya un cambio en el estado de autenticación (si se inicia o cierra sesion)
 (
     auth, // el primer parámetro es la referencia a Authentication 
     async user => { // el segundo parámetro es el callback que se va a ejecutar cada vez que ocurra un cambio en el estado de autenticación
-    /* CHATGPT => https://chatgpt.com/share/67412263-75e0-800b-b968-fef6aa30bce4
-    El callback que le pasas a onAuthStateChanged() se ejecuta cada vez que ocurre un cambio en el estado de autenticación.
-        - Si un usuario está autenticado, el callback recibe como argumento un objeto user con la información del usuario (ID, email, etc.).
-        - Si no hay un usuario autenticado, el callback recibe null.
-    */
+        /*
+        El callback que se le pasa a onAuthStateChanged() se ejecuta cada vez que ocurre un cambio en el estado de autenticación
+            - Si un usuario está autenticado, el callback recibe como argumento un objeto {user} con la información del usuario (uid, email, etc.).
+            - Si no hay un usuario autenticado, el callback recibe null
+        */
         if(user) {
             // si existe user, seteamos los valores de loggedUser con los datos del usuario
-            console.log("Confirmando que el usuario está autenticado.")
+            console.log("Confirmando que el usuario está autenticado")
+
             // Actualizamos los datos locales de loggedUser, notificamos a los observers y guardamos los cambios del user en localStorage con la función updateLoggedUser()
-            updateLoggedUser ({ // le pasamos como parámetros un objeto con los datos nuevos del usuario
-                id: user.uid, //  En el usuario de Firebase Authentication, el id se llama 'uid' (unic id)
+            updateLoggedUser ({ // le pasamos como parámetro un objeto con los datos del usuario autenticado
+                id: user.uid, //  En el usuario de Firebase Authentication, el id se llama 'uid' (unique id)
                 email: user.email, 
                 displayName: user.displayName, 
             })
 
-            // Buscamos ahora el resto de datos del perfil. Estos otros datos se encuentran en una collection, en el document respectivo del usuario
+            // Buscamos ahora el resto de datos del perfil. Estos otros datos se encuentran en la collection 'users', en el document respectivo del usuario
+            // usamos getUserProfileByID() de [user-profile.js] para obtener estos registros
             getUserProfileByID(user.uid) // le pasamos el id del user, que como se dijo antes, en Firebase Authentication lo encontramos bajo el nombre 'uid'
                 .then(userProfile => { // userProfile es el objeto que recibimos como respuesta de la función getUserProfileByID
                     // Actualizamos los datos locales de loggedUser, notificamos a los observers y guardamos los cambios del user en localStorage con la función updateLoggedUser()
-                    updateLoggedUser ({ // le pasamos como parámetros un objeto con los datos nuevos del usuario
+                    updateLoggedUser ({ // le pasamos como parámetro un objeto con los datos nuevos del usuario
                         bio: userProfile.bio, // le agregamos la bio
                         fullyLoaded: true, // y le cambiamos el fullyLoaded a true
                     })
@@ -68,35 +83,9 @@ onAuthStateChanged // onAuthStateChanged() recibe un callback que se ejecuta cad
         )
     }
 })
-/* 
-Dato: onAuthStateChanged() queda "suelto" en la raíz del proyecto y esto hace que cada vez que alguien importe este archivo auth.js se ejecuta automáticamente onAuthStateChanged().
-    Tan pronto alguien importa este módulo para usar cualquiera de sus funciones, ya le dejamos especificado que vamos a necesitar suscribirnos a la autenticación de Firebase
-    Clase 7 (27 de sep), min 36:00 dijo esto 
-*/
-
-// creamos la funció para registrnos (crear cuenta)
-export async function register({email, password}) {
-    try {
-        // Registrarse en la aplicaicón requiere 2 acciones:
-        // 1. Crear el usuario en Authentication.
-        // 2. Crear un documento en Firestore, en la collection 'users', usando el uid del usuario en Authentication
-
-        // Primero nos registramos en Authentication
-        const credentials = await createUserWithEmailAndPassword( // createUserWithEmailAndPassword() es como el signInWithEmailAndPassword
-            auth, //  le pasamos la referencia al servicio de autenticación
-            email, // el email
-            password // y el password
-        ) // createUserWithEmailAndPassword RETORNA las credenciales del usuario
-
-        // llamamos a la functión "createUserProfile()" de [user-profile.js] para crear el prefil del usuario en Firestore
-        await createUserProfile(credentials.user.uid, {email})
-    } catch (error) {
-        console.error("[auth.js register] Error al tratar de crear una cuenta: ", error)
-        throw error
-    }
-}
 
 
+// creamos la función para iniciar sesión
 export async function login({email, password}) {
     // Tratamos de autenticar usando la función signInWithEmailAndPassword(), que sirve para iniciar sesión con un email y password
     // Recibe 3 parámetros:
@@ -104,7 +93,7 @@ export async function login({email, password}) {
     // 2. El email
     // 3. El password
     // Retorna una Promise que se resuelve con UserCredentials, y se rechaza si el login no es exitoso
-    try { // como puede ser rechazado y fallar la autentificación lo hacemos dentro de un trycatch
+    try {
         const user = await signInWithEmailAndPassword(auth, email, password) 
         console.log("Sesión iniciada con éxito", user)
 
@@ -113,6 +102,31 @@ export async function login({email, password}) {
         throw error
     }
 }
+
+// creamos la función para registrarnos (crear cuenta)
+export async function register({email, password}) {
+    try {
+        // Registrarse en la aplicaicón requiere 2 acciones:
+        // 1. Crear el usuario en Authentication
+        // 2. Crear un documento en Firestore, en la collection 'users', usando el uid del usuario en Authentication
+
+        // Primero nos registramos en Authentication
+        const credentials = await createUserWithEmailAndPassword( // createUserWithEmailAndPassword() es como el signInWithEmailAndPassword
+            auth, //  le pasamos la referencia al servicio de Authentication
+            email, // el email
+            password // y el password
+        ) // createUserWithEmailAndPassword RETORNA las credenciales del usuario
+
+        // llamamos a la functión "createUserProfile()" de [user-profile.js] para crear el prefil del usuario en Firestore
+        await createUserProfile(credentials.user.uid, {email}) // enviamos 2 argumentos: el uid del user y un objeto con el email ingresado
+    } catch (error) {
+        console.error("[auth.js register] Error al tratar de crear una cuenta: ", error)
+        throw error
+    }
+}
+
+
+
 
 
 /**
@@ -269,7 +283,7 @@ function notifyAll(){
 
 
 /**
- * Actualiza los datos del usuario autenticado
+ * Actualiza la variable local 'loggedUser' con los datos del usuario autenticado, notifica a los observers y actualiza el usuario en localStorage 
  * 
  * @param {{}} newData 
  */

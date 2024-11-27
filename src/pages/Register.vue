@@ -5,9 +5,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-
-
-const user = ref({
+const newUser = ref({
     email: '',
     password: '',
 })
@@ -17,12 +15,11 @@ const loading = ref(false)
 
 
 async function handleSubmit(){
-    // handleSubmit va a llamar a una función register, que está en el archivo [auth.js]
+    // handleSubmit va a llamar a una función register() de [auth.js]
 
     loading.value = true
-
     try {
-        await register({...user.value}) // llamamos a la función register() y le pasamos un objeto con los datos del user (osea los datos ingresados en el fomrulario)
+        await register({...newUser.value}) // llamamos a la función register() y le pasamos un objeto con los datos del newUser (osea los datos ingresados en el fomrulario)
     } catch (error) {
         console.error("[Register handleSubmit] Error al registrarse: ", error)
         // TODO: Manejar el error y mostrar un feedback
@@ -50,7 +47,7 @@ async function handleSubmit(){
             type="email" 
             id="email" 
             class="p-2 w-full border rounded"
-            v-model="user.email"
+            v-model="newUser.email"
         >
     </div>
     
@@ -60,7 +57,7 @@ async function handleSubmit(){
             type="password" 
             id="password" 
             class="p-2 w-full border rounded"
-            v-model="user.password"
+            v-model="newUser.password"
         >
     </div>
     <button type="submit" class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 transition-colors duration-200">Crear Cuenta</button>

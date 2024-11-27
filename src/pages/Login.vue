@@ -14,18 +14,17 @@ const user = ref({
 const loading = ref(false)
 
 async function handleSubmit(){
-    // handleSubmit va a llamar a una función login, que está en el archivo [auth.js]
+    // handleSubmit va a llamar a la función login() de [auth.js]
     loading.value = true
     try {
         await login({...user.value}) // llamamos a la función login() y le pasamos un objeto con los datos del user (osea los datos ingresados en el fomrulario)
     } catch (error) {
         console.error("[Login.vue handleSubmit()] Error al autentificar: ", error)
+        // TODO: manejar error
     }
-    // si se logua correcatamente lo enviamos a la página de publicaciones
+    // si se logua correcatamente lo enviamos a la página de su perfil para que lo edite si lo desea
     router.push('/mi-perfil')
 }
-
-
 
 </script>
 

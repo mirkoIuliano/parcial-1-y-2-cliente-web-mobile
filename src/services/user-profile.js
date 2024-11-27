@@ -40,13 +40,15 @@ export async function updateUserProfile(id, {displayName, bio}) {
  * @param {string} id 
  * @returns {{id: string, email: string, displayName: string, bio: string}}
  */
-// Creamos esta función porque antes veníamos trayendo el displayName, el email y el id desde el Authentication, pero el y la bio lo tenemos en un doc dentro de una collection. Así que ahora vamos a traer TODOS los datos de la collection y del document específico del usuario
-export async function getUserProfileByID(id) {
-    const profileRef = doc(db, `/users/${id}`)
-    const profileSnapshot = await getDoc(profileRef) // getDoc retorna un documento que colocamos en la varaible profileSnapshot 
+// Creamos esta función porque antes veníamos trayendo el displayName, el email y el id desde el Authentication, pero la bio la tenemos en un document dentro de la collection 'users'. Así que ahora vamos a traer TODOS los datos del document específico del usuario
+export async function getUserProfileByID(id) { // recibe como parámetro el uid del usuario
+    // creamos una referencia al documento con los registro del usuario
+    const profileDocumentRef = doc(db, `/users/${id}`) // en la colletion 'users', los documents tienen como id el uid del usuario del cual contienen la inforamción. Así que haciendo `/users/${id}` estamos teniendo la referencia al docuemento con los registros del usuario especificado
+    const profileSnapshot = await getDoc(profileDocumentRef) // con getDoc() traemos los registros de un documento. Como parámetro hay que pasarle la referencia del document del cual queremos traer los datos
 
+    // como respuesta vamos a retornar un objeto con los datos del documento (osea los datos del usuario)
     return {
-        id: profileSnapshot.id,
+        id: profileSnapshot.id, // como id pasamos el id del documento ya que, como dije antes, el docuement tiene como id el uid del usuario
         email: profileSnapshot.data().email,
         displayName: profileSnapshot.data().displayName,
         bio: profileSnapshot.data().bio,
@@ -54,18 +56,19 @@ export async function getUserProfileByID(id) {
 }
 
 /**
+ * Esta función va a crear en la Collection 'users', un nuevo Documento con los datos del usuario registrado 
  * 
  * @param {string} id 
  * @param {{email: string}} data 
  */
 export async function createUserProfile(id, {email}) {
-    // obtenemos la referencia al documento del usuario usando doc(), mandandole como parámetros: 
-    // 1. la referencia a la base de datos  
-    // 2. el nombre de la collection ('/users') y el id del documento ('/${id}')
-    const profileRef = doc(db, `/users/${id}`)
+    // Obtenemos la referencia al documento usando doc(), mandandole como parámetros: 
+    // 1. La referencia a la base de datos  
+    // 2. El nombre de la collection ('/users') y el id del documento ('/${id}')
+    const profileDocumentRef = doc(db, `/users/${id}`) // como en un primer momento no existe el documento, se crea en la Collection 'users' un Document con id = al uid del usuario que acaba de crear usuario
     
-    await setDoc( // setDoc es la función para guardar los datos de un documento específico
-        profileRef, // le pasamos la refencia al documento
+    await setDoc( // setDoc() es la función para guardar los datos de un documento específico
+        profileDocumentRef, // le pasamos la refencia al documento
         {email} // y le pasamos la data que le queremos guardar
     ) 
 }

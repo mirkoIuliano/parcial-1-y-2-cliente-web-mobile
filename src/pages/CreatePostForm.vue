@@ -26,17 +26,9 @@ const posts = ref(
 
 // esta variable va a capturar los datos de los inputs
 const newPost = ref({
-    // user_name: '',
     book_title: '',
     review: '',
 })
-
-// Cuadno se monte el componente leemos los posteos de Firestore
-onMounted(async() => {
-    // llamamos a la función "subscribeToPublicPosts()" que sirve para recibir todos posteos de la base de datos
-    subscribeToPublicPosts(newPosts => posts.value = newPosts) // a subscribeToPublicPosts() hay que pasarle como parámetro una función callback
-    }
-) 
 
 function handleSubmit(){
     console.log("Se envió el formulario de posteo nuevo")
@@ -51,11 +43,8 @@ function handleSubmit(){
     newPost.value.book_title = '';
     newPost.value.review = '';
 
-    // TODO: reenviar a la pág con todos los posts
     router.push('/publicaciones')
 }
-
-
 
 </script>
 
@@ -66,16 +55,6 @@ function handleSubmit(){
     @submit.prevent="handleSubmit"
     class="w-2/4 border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8"
     >
-        <!-- <div class="mb-5">
-            <label for="user_name" class="block mb-2 text-lg font-semibold text-slate-700">Nombre de Usuario</label>
-            <input 
-                type="text" 
-                id="user_name"
-                class="px-4 py-2 border border-slate-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                placeholder="Ingresa el título del libro"
-                v-model="newPost.user_name"
-            >
-        </div> -->
 
         <div class="mb-5">
             <label for="book_title" class="block mb-2 text-lg font-semibold text-slate-700">Título del Libro</label>
@@ -83,7 +62,7 @@ function handleSubmit(){
                 type="text" 
                 id="book_title"
                 class="px-4 py-2 border border-slate-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                placeholder="Ingresa el título del libro"
+                placeholder="Escribe el título del libro que deseas reseñar"
                 v-model="newPost.book_title"
             >
         </div>
@@ -93,7 +72,7 @@ function handleSubmit(){
             <textarea 
                 id="review"
                 class="px-4 py-2 border border-slate-300 rounded-md w-full h-32 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                placeholder="Escribe tu reseña aquí..."
+                placeholder="Comparte tu opinión sobre el libro..."
                 v-model="newPost.review"
             ></textarea>
         </div>

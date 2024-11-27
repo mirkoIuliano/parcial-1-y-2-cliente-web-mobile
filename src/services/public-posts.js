@@ -23,26 +23,23 @@ export async function savePulicPost({book_title, review})
         console.error("[public-posts.js savePublicPost] No hay un usuario autenticado. ", error)
         throw error
     }
-
-
+    
     // Escribimos en Firestore
     // Para interactuar con una collection o document de Firestore es necesario definir una referencia a dicha collection o document
-    // Para las collection usamos la función "collection"
-    // Para los documentos usamos la función "document" 
-    const publicPostsRef = collection(db, 'public-posts') // collection recibe dos parámetros: la conexión a la base (db) y el nombre/ruta de la collection
+    // Para definir una referencia a una collection usamos la función "collection()"
+    const publicPostsCollectionRef = collection(db, 'public-posts') // collection() recibe dos parámetros: la conexión a la base (db) y el nombre/ruta de la collection
     
-    // Para agregar un docuemnto a una collection, usamos la función addDoc, que recibe 2 arguemntos:
-    // 1. La referencia de la collection    2. Un objeto con los datos
-    // Este método retorna una promesa que se resuelve cuando termina de escrbir (cuando se confirma que se grabó) (En este caso que vamos a hacer no nos va a servir la promesa, pero quizá en un futuro sí)
-    await addDoc(publicPostsRef, // le pasamos la referencia a la collection de las publicaciones (publicPostsRef)
-        {   // le pasamos como segundo parámetro un objeto que contenga los datos del posteo
-            user_id: user.uid,
-            user_name: user.displayName || "Usuario sin user name", // en caso de no tener user name pone eso 
+    // Para agregar un docuemnto a una collection, usamos la función addDoc(), que recibe 2 arguemntos:
+    // 1. La referencia de la collection    2. Un objeto con los datos que queremos agregar en ek documento
+    // Este método retorna una promesa, que se resuelve cuando termina de escrbir (cuando se confirma que se grabó) (En este caso no nos va a servir la promesa, pero quizá en un futuro sí)
+    await addDoc(publicPostsCollectionRef, // le pasamos la referencia a la collection de las publicaciones (publicPostsCollectionRef)
+        {   // le pasamos como segundo parámetro un objeto que contenga los datos del posteo. En este caso van a ser los datos del usuario que lo hizo, el contenido del posteo y un array vacío de comments
+            user_id: user.uid, // pasamos el id del usuario
             book_title,
             review,
-            comments: [],
-        // usamos la función serverTimestamp para guardar la fecha de creación. Esta función deja indicado que queremos que cuando el registro se grabe en el servidor, se tome la fecha y la hora del servidor 
-        created_at: serverTimestamp(), 
+            comments: [], // agregamos un array vacío donde se van a guardar los comentarios 
+            created_at: serverTimestamp(), 
+            // usamos la función serverTimestamp para guardar la fecha de creación. Esta función deja indicado que queremos que cuando el registro se grabe en el servidor, se tome la fecha y la hora del servidor 
         }
     ) 
 }

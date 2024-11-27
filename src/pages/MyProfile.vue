@@ -5,8 +5,8 @@ import { addCommentToPost, getPostsByUserId } from '../services/public-posts';
 import { auth } from '../services/firebase';
 import { getDisplayNameByUserId } from '../services/user-profile';
 
-// creamos "unsubscribeFromAuth" y la definimos como una función vacía (porque después vamos a igual "unsubscribeFromAuth" a una función)
-let unsubscribeFromAuth = () => {}
+// creamos "unsubscribeFromAuth()" y la definimos como una función vacía. Esto lo hacemos porque después vamos a guardar en ella una función para desuscribirnos de los cambio de autenticación
+let unsubscribeFromAuth = () => {} 
 
 const loggedUser = ref({
     id: null,
@@ -20,7 +20,7 @@ const posts = ref([])
 onMounted(() => {
     // cuando se monte queremos llamar al subscribeToAuthChanges
     unsubscribeFromAuth = subscribeToAuthChanges(newUserData => loggedUser.value = newUserData)
-    // subscribeToAuthChanges retorna como resultado una función para cancelar la suscripción. Esta función se va a guardar en unsubscribeFromAuth, osea que dentro de unsubscribeFromAuth va a tener la función para desuscrirse 
+    // subscribeToAuthChanges retorna como resultado una función para cancelar la suscripción. Esta función se va a guardar en unsubscribeFromAuth, osea que dentro de unsubscribeFromAuth va a tener la función para desuscrirse ==> lo vamos a usar para que cuando desmontemos el componente se desuscriba
 
     getPostsByUserId(async (userPosts) => {
         // al array posts le vamos a agregar lo siguiente
