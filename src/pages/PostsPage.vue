@@ -24,54 +24,43 @@ const posts = ref(
     ]
 ) */
 
-// const newComment = ref({
-//     user_name: "",
-//     user_comment: "",
-// })
-
 const router = useRouter(); 
 
-async function handleComment (id, user_comment )
+async function handleComment (postId, user_comment )
 {
     // uso auth.currentUser para saber si hay o no un usuario autenticado 
     if (auth.currentUser){
-        await addCommentToPost( id, 
-        {
+        // addCommentToPost de [publi-posts] es una función que agrega un comentario en el array comments del deocument del posteo específico 
+        await addCommentToPost( postId, // el primer parámetro es el id del document del post
+        { // el segundo parámetro es un objeto con el comnetario y el id del usuario que lo comentó
             user_comment,
             comment_user_id: auth.currentUser.uid
             // console.log(auth.currentUser.uid)
         }
     )
 } else {
+    // si quiere comentar y no está autenticado lo redireccionamos a página de iniciar sesión
         alert("Para comentar es necesario iniciar sesión primero")
         router.push('/iniciar-sesion')
     }
 
-
-    // una vez terminado se borran los campos
-    // newComment.value.user_name = ""
-    // newComment.value.user_comment = ""
-
-    // FIJARME DESPUÉS EN CASA
-     // Limpiamos los campos de comentario solo para el post correspondiente
+    // Limpiamos los campos de comentario solo para el post correspondiente
     const post = posts.value.find(post => post.id === id);
-    // post.commentsModel.user_name = "";
     post.commentsModel.user_comment = "";
 }
 
 // Cuando se monte el componente leemos los posteos de Firestore
 onMounted( async () => {
 
-
     // llamamos a la función "subscribeToPublicPosts()" que sirve para recibir todos los posteos de la base de datos
     subscribeToPublicPosts( async (newPosts) => { // newPosts es una lista con todas las publicaciones
         
-        // al array posts le vamos a agregar lo siguiente
+        // al array 'posts' le vamos a agregar lo siguiente:
         posts.value = await Promise.all( 
             
-            newPosts.map(async (post) => { // hacemos un .map() de la lista de publicaciones
-                const resolvedComments  = await Promise.all( // creamos una const "resolvedComments" que va a contenter todos los comentarios ya existentes del documento
-                    post.comments.map(async (comment) => { // post (que sería uno de los docuemntos de 'newPosts') tiene un atributo comments, que es un array de comentarios. Vamos a hacer un .map() de este array y a cada ciomentario vamos a ponerle un user_name usando getDisplayNameByUserId()
+            newPosts.map(async (post) => { // hacemos un .map() de la lista de publicaciones que nos llega por subscribeToPublicPosts()
+                const resolvedComments  = await Promise.all( // creamos una const "resolvedComments" que va a contenter todos los comentarios ya existentes del documento, pero con el user_name adecuado
+                    post.comments.map(async (comment) => { // post (que sería uno de los docuemntos de 'newPosts') tiene un atributo comments, que es un array de comentarios. Vamos a hacer un .map() de este array y a cada comentario vamos a ponerle un user_name usando getDisplayNameByUserId()
 
                         const displayName = await getDisplayNameByUserId(comment.comment_user_id) // con getDisplayNameByUserId() hacemos que el user_name sea dinámico. Si guardasemos el atributo user_name al hacer el comentario, éste quedaría siempre igual y si el usuario que hizo el comentario cambia su user_name en el comentario seguiría apareciendo el user_name viejo
                         // Dentro de comments[] está el contenido del comentario (user_comment) y el id (comment_user_id) de la persona que lo hizo. getDisplayNameByUserId() se encarga de transformar ese id en el user_name
@@ -83,7 +72,7 @@ onMounted( async () => {
                     })
                 ) // acá termina resolvedComments
 
-                // una vez terminado el mapeo de resolvedComments podemos cargar en posts.value un objeto con los siguientes datos
+                // una vez terminado el mapeo de resolvedComments podemos cargar en variable local 'posts.value' un objeto con los siguientes datos
                 return { 
                     ...post, // todo lo que contenga el documento (book_title, created_at, review)
                     comments: resolvedComments, // sobreescribimos 'comments' con los comentarios ya existentes con los user_name hechos dinámicamente
@@ -91,18 +80,20 @@ onMounted( async () => {
                         user_comment: "",
                     }
                     /*  commentsModel más explayado:
-                        Como estamos realizando todo esto dentro de onMounted(), cuando se monta el DOM se va a ejecutar todas estas cosas y entre ellas se va a agregar el objeto commentsModels que CREO que sería algo así:
+                        Como estamos realizando todo esto dentro de onMounted(), cuando se monta el DOM se va a ejecutar todas estas cosas y entre ellas se va a agregar el objeto commentsModels que sería algo así:
                         posts = [
                             {
                                 book_title: "El Héroe de las Eras",
                                 comments: [
                                     {
-                                        comment_user_id"enpbrHIijzYqrl3dqDlhv6iPUnJ3",
-                                        user_comment"si?"
+                                        comment_user_id: enpbrHIijzYqrl3dqDlhv6iPUnJ3",
+                                        user_comment: "si?",
+                                        user_name: mirko, ===> creado dinámicamente
                                     },
                                     {
-                                        comment_user_id"xcqnYE8hnEWDPfIZphx5tHF58z03",
-                                        user_comment"Así es"
+                                        comment_user_id: "xcqnYE8hnEWDPfIZphx5tHF58z03",
+                                        user_comment: "Así es",
+                                        user_name: esme, ===> creado dinámicamente
                                     },
                                 ],
                                 created_at 24 de noviembre de 2024, 3:13:15 p.m. UTC-3 ,
@@ -173,14 +164,6 @@ onMounted( async () => {
                 
                 <form action="#" @submit.prevent="handleComment(post.id, post.commentsModel.user_comment)">
                     <div class="mt-5">
-                        <!-- <label for="user_name" class="block sr-only">Usuario</label>
-                        <input 
-                            type="text" 
-                            for="user_name"
-                            class="px-4 py-1 border border-slate-300 rounded-md w-2/12 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                            v-model="post.commentsModel.user_name"
-                            placeholder="@user_name"
-                        > -->
                         <label for="user_comment" class="block sr-only">Comentar</label>
                         <input 
                             type="text" 

@@ -52,17 +52,17 @@ export async function savePulicPost({book_title, review})
  */
 export async function subscribeToPublicPosts(callback) // va a recibir un callback como parámetro. Este callback lo ejecutamos dentro del onSnapshot
 {
-    // Para leer los documentos de la collection "public-posts" empezamos por crear la referencia
-    const publicPostsRef = collection(db, 'public-posts')
+    // Para leer los documentos de la collection "public-posts" empezamos por crear la referencia a dicha collection
+    const publicPostsCollectionRef = collection(db, 'public-posts')
                     // collection es una función de firestore que nos permite obtener una referencia de una collection
 
     /*
         Creamos un "query" (consulta) para traer los registros ordenados por fecha de creación
-        En Firestore se crea una query con una función llamada "query", que recibe AL MENOS 2 parámetros: 
+        En Firestore se crea una query con una función llamada "query()", que recibe AL MENOS 2 parámetros: 
         1. Una referencia a una collection  2. Una o más instrucciones de ordenamiento, filtro o límite
     */
     const postsQuery = query(
-        publicPostsRef,
+        publicPostsCollectionRef,
         orderBy('created_at', "desc") // lo ordenamos de manera descendente porque queremos que los posteos más recientes aparezcan arriba
     )
 
@@ -73,13 +73,13 @@ export async function subscribeToPublicPosts(callback) // va a recibir un callba
         const newPosts = await Promise.all ( // como necesitamos llamar a la función asíncrona getDisplayNameByUserId() para obtener el displayName, usamos Promise.all() para esperar a que todas las promesas de getDisplayNameByUserId se resuelvan antes de pasar los datos al callback
             snapshot.docs.map(async (doc) => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title, review, displayName, etc
                 const displayName = await getDisplayNameByUserId(doc.data().user_id) // getDisplayNameByUserId() es una función de [user-profile.js] que sirve para obtener el nombre de usuario (displayName) de manera dinámica. Sin esta función, si guardamos user_name: doc.data().user_name, va a quedar estático y si se cambia el nombre va a seguir el nombre anterior en vez del actualziado
+                // como respuesta retornamos un objeto que contiene:
                 return {
                     id: doc.id,
                     user_name: displayName || "", // usamos displayName, que es el nombre dinámico
                     book_title: doc.data().book_title || "",
                     review: doc.data().review || "",
                     comments: doc.data().comments || [], // si falta, devuelve un array vacío
-                    // user_id: doc.data().user_id
                 }
             })
         ) 
