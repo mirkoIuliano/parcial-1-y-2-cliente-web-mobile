@@ -16,7 +16,7 @@ const handleSubmit = async () => {
     loading.value = true;
     
     try {
-        await editMyProfile({...editData.value}) // llamamos a la función editMyProfile y le pasamos una copia de mi usuario autenticado
+        await editMyProfile({...editData.value}) // llamamos a la función editMyProfile y le pasamos un objeto con la copia de los datos que queremos editar
     } catch (error) {
         // TODO: Manejar el error y mostrar un mensaje de feedback
     }
@@ -28,9 +28,9 @@ const handleSubmit = async () => {
 onMounted(()=> {
     // cuando monte queremos que traiga los datos del usuario autenticado para que en nuestro formulario de editar aparezcan los datos actuales, en vez de los input en blanco sin nada
     unsubscribeFromAuth = subscribeToAuthChanges(
-        newUserData => editData.value = {
-            displayName : newUserData.displayName || '', // este (|| '') lo puso en clase 8 min 41:30. 
-            bio : newUserData.bio || '', // esto sirve para que, si no existe la bio o el displayName, en vez de quedar como undefined queden como ''
+        userData => editData.value = {
+            displayName : userData.displayName || '', // este (|| '') lo puso en clase 8 min 41:30. 
+            bio : userData.bio || '', // esto sirve para que, si no existe la bio o el displayName, en vez de quedar como undefined queden como ''
         })
     // subscribeToAuthChanges retorna como resultado una función para cancelar la suscripción. Esta función se va a guardar en unsubscribeFromAuth, osea que dentro de unsubscribeFromAuth va a tener la función para desuscrirse 
 })

@@ -72,7 +72,6 @@ let loggedUser = {
     email: null,
     displayName: null,
     bio: null,
-    career: null,
 }
 
 // Creo que llamamos acá para poder ver si el usuario está autenticado o no y con esto permitir o no la navegación a cieras rutas

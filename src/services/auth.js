@@ -10,7 +10,6 @@ let loggedUser = {
     email: null,
     displayName: null,
     bio: null,
-    career: null,
     fullyLoaded: false,
 }
 
@@ -77,7 +76,6 @@ onAuthStateChanged // onAuthStateChanged() recibe un callback como parámetro, q
                 email: null,
                 displayName: null,
                 bio: null,
-                career: null,
                 fullyLoaded: false,
             }
         )
@@ -130,10 +128,10 @@ export async function register({email, password}) {
 /**
  * Esta es la función para editar mi perfil y poder ponerle un nombre de usuario, biografía y la carrera
  * 
- * @param {{displayNamem: string, bio: string, career: string}} data
+ * @param {{displayName: string, bio: string}} data
  * @returns {Promise<null>} 
  */
-export async function editMyProfile({displayName, bio, career}) {
+export async function editMyProfile({displayName, bio}) {
     try {
         // Actualizamos el displayName en Authentication
         const promiseAuth = updateProfile( // updateProfile recibe 2 parámetro: 
@@ -144,22 +142,21 @@ export async function editMyProfile({displayName, bio, career}) {
         )
         // Info: updateProfile() es una función que permite actualizar los datos de un usuario, pero el profe nos mostró (clase 7, min 55) que solo se pueden actulizar dos datos: la foto de perfil y el nombre de usuario
 
-
-        // Actualizamos el perfil del usuario en Firestore con la función 'updateUserProfile()' de nuestro archivo 'user-profile.js'
+        // Actualizamos el perfil del usuario en Firestore con la función 'updateUserProfile()' de [user-profile.js]. Acá vamos a actualzar el document del user que está dentro de la collection 'users'
         const promiseProfile = updateUserProfile( // a updateUserProfile() le tenemos que pasar dos parámetros:
             loggedUser.id, // el id del usuario que queremos modificar
             { // un objeto con los datos que queremos editar
-                displayName, bio, career
+                displayName, bio
             }
         ) 
 
         /* CLASE 8 min 50 saca los 'await' que habían en las funciones updateProfile() y updateUserProfile() porque en realidad no nos importa que hagan estas funciones a la vez y además es mejor por cuestiones de rendimietno que se hagan al unísono
             Lo que pasa es que en MyProfileEdit tenemos una variable 'loading' que nos sirve para indicar cuando se está guardando los datos (sirve más que nada para que se muestre en la interfaz que se están guardando los datos y comunicarselo al usuario)
             Como sacamos estos await, este 'loading' cambia de estado de true a false de manera inmediata porque las funciones se hacen a la vez y no hay nada a lo que esperar.
-            Para solucionar esto se crearon promiseAuth y promisePromise, que van a capturar las promesas de las dos funciones (ambas promesas retornan funciones)
+            Para solucionar esto se guradan updateProfile y updateUserProfile en promiseAuth y promiseProfile, que van a capturar las promesas de las dos funciones (ambas promesas retornan funciones)
         */
         // Esperamos a que ambas promesas se completen, con ayuda de la función Promise.all()
-        await Promise.all( // all() es un método de la clase Promise, que permite recibir un array de promesas y retorna una nueva promesa, que se resuelve cuando todas las promesas que le pasamos se resuelve, y que se rechaza cuando alguna de las promesas que le mandamos se rechaza
+        await Promise.all( // all() es un método de la clase Promise, que permite recibir un array de promesas y retorna una nueva promesa, que se resuelve cuando todas las promesas que le pasamos se resuelven, y que se rechaza cuando alguna de las promesas que le mandamos se no se cumple
             [
                 promiseAuth, promiseProfile
             ]
@@ -172,8 +169,7 @@ export async function editMyProfile({displayName, bio, career}) {
         // Actualizamos los datos locales de loggedUser, notificamos a los observers y guardamos los cambios del user en localStorage con la función updateLoggedUser()
         updateLoggedUser ({ // le pasamos como parámetros un objeto con los datos nuevos del usuario
             displayName,
-            bio, 
-            career, 
+            bio,
         })
 
 

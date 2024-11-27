@@ -12,20 +12,20 @@ import { db } from "./firebase";
 
 /**
  * 
- * @param {string} id 
+ * @param {string} uid 
  * @param {displayName: string, bio: string} data 
  */
 // creamos la función para modificar displayName y la bio de un usuario
-export async function updateUserProfile(id, {displayName, bio}) {
+export async function updateUserProfile(uid, {displayName, bio}) {
     // En esta ocasión nosotors queremos modificar un documento en específico
     // Esto requiere que usemos la función doc() de Firestore para crear la referencia a un documento específico
-    const profileRef = doc(db, // como primer parámetro le pasamos la referncia a la base de datos 'Firestore'
-        `/users/${id}` // como segundo parámetro le pasamos el nombre de la collection ('/users') y el id del documento ('/${id}') => de esta forma tenemos la referencia al doc específico del usuario
-        // el proceso sería: primero tenemos acceso a la base de datos con 'db' y después entramos a la collection users ('/users') y entramos al doc específico ('/${id}')
+    const profileDocumentRef = doc(db, // como primer parámetro le pasamos la referncia a la base de datos 'Firestore'
+        `/users/${uid}` // como segundo parámetro le pasamos el nombre de la collection ('/users') y el id del documento ('/${uid}') => de esta forma tenemos la referencia al doc específico del usuario
+        // el proceso sería: primero tenemos acceso a la base de datos con 'db' y después entramos a la collection users ('/users') y entramos al doc específico ('/${uid}')
     )
 
     // Editamos el documento usando la función updateDoc()
-    await updateDoc(profileRef, // como primer parámetro le pasamos la referencia al documento específico
+    await updateDoc(profileDocumentRef, // como primer parámetro le pasamos la referencia al documento específico
         { // como segundo parámetro le pasamos los datos 
             displayName,
             bio,
