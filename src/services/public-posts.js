@@ -89,20 +89,17 @@ export async function subscribeToPublicPosts(callback) // va a recibir un callba
 }
 
 // Función para agregar un comentario al post
-export async function addCommentToPost(postId, comment) 
+export async function addCommentToPost(postId, comment) // como parámetros recibe el id del post y el contenido del comentario (el id del que comnetó y el contenido de ese comentario) 
 {
-    const user = auth.currentUser
-    
-    // postRef va a tener la referencia al documento de la publicación específica
-    const postRef = doc(db, 'public-posts', postId); // usamos doc para poder buscar en la collection 'public.posts' el documento específico al cual se le está agregando un comentario
+    // postDocumentRef va a tener la referencia al documento de la publicación específica
+    const postDocumentRef = doc(db, 'public-posts', postId); // usamos doc para poder buscar en la collection 'public.posts' el documento específico al cual se le está agregando un comentario
 
     // usamos updateDoc para editar el documento 
-    await updateDoc(postRef, // como primer parámetro le pasamos la referencia al documento específico
+    await updateDoc(postDocumentRef, // como primer parámetro le pasamos la referencia al documento específico
         { // como segundo parámetro le pasamos un objeto con los datos que queremos agregar
             comments: arrayUnion( // uso la función arrayUnion() para agregar datos al array comments, que está dentro de nuestro docuemento del post
                 { 
-                    ...comment,
-                    // user_name: user.displayName
+                    ...comment, // le agregamos todo lo que contenga comment (que es el user_comment y el comment_user_id)
                 }
             ) 
         }
@@ -114,39 +111,32 @@ export async function getPostsByUserId(callback) {
 
     let userPostsQuery
 
-    // let loggedUser = {
-    //     id: null
-    // }
-    // if (localStorage.getItem('user')){
-    //     loggedUser = JSON.parse(localStorage.getItem('user'))
-    // }
-
-
-    // Para leer los documentos de la collection "public-posts" empezamos por crear la referencia
-    const publicPostsRef = collection(db, 'public-posts')
+    // Para leer los documentos de la collection "public-posts" empezamos por crear la referencia a dicha collection
+    const publicPostsCollectionRef = collection(db, 'public-posts')
 
 
     const user = getAuthenticatedUser()
     /*
     Uso getAuthenticatedUser() en vez de hacer ==> const user = auth.currentUser;
-    Porque si lo hago así, cuando entro a la página user va a ser null porque tarda en cargar todo lo de Authentication. Como es null, después en el if(user){...} no funciona
-    Si quiero ver, comentar el getAuthenticatedUser y poner la otra opción.
+    Porque si lo hago así, cuando entro a la página, 'user' va a ser null porque tarda en cargar todo lo de Authentication. Como es null, después en el if(user){...} no funciona
+    Si quiero ver, comentar el getAuthenticatedUser y poner la otra opción
     Tampoco funciona si pongo ==> const user = await auth.currentUser;
     */
-    if(user){
+
+    if(user){ // si hay un user autenticado:
         // console.log("hay un usuario autenticado")
-        // console.log(user)
+        // creo una query (consulta) para traer todos los documentos del usuario ordenados de manera descendente
         userPostsQuery = query(
-            publicPostsRef,
-            orderBy('created_at', 'desc'), // Ordenamos por fecha de creación descendente
-            // Filtro para obtener solo las publicaciones del usuario autenticado
-            where('user_id', '==', user.id)
+            publicPostsCollectionRef, // le paso la referencia a la collection de donde quiero que traiga los documents
+            orderBy('created_at', 'desc'), // ordenamos por fecha de creación, de manera descendente
+            // y filtro para obtener solo las publicaciones del usuario autenticado
+            where('user_id', '==', user.id) // solo va a traer los documents que tengan user_id igual al user.id 
         )
     } else {
         // TODO: manejar error
     }
 
-    // uso onSnapshot para que se actualice si alguien hace un nuevo comentario
+    // uso onSnapshot para que se actualice si alguien hace un nuevo comentario. Como primer parámetro le tenemos que pasar la referencia a la collection o una query y como segundo, la función callback
     onSnapshot(userPostsQuery, async (snapshot) => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión
         const userPosts = await Promise.all( // como necesitamos llamar a la función asíncrona getDisplayNameByUserId() para obtener el displayName, usamos Promise.all() para esperar a que todas las promesas de getDisplayNameByUserId se resuelvan antes de pasar los datos al callback
             snapshot.docs.map(async (doc) => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title y review
@@ -157,7 +147,6 @@ export async function getPostsByUserId(callback) {
                     book_title: doc.data().book_title || "",
                     review: doc.data().review || "",
                     comments: doc.data().comments || [], // si falta, devuelve un array vacío
-                    // user_id: doc.data().user_id
                 }
             })
         ) 

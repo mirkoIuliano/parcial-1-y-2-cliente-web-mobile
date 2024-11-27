@@ -37,13 +37,13 @@ export async function updateUserProfile(id, {displayName, bio}) {
 /**
  * Esta función va a retornar todos los datos del documento del usuario
  * 
- * @param {string} id 
+ * @param {string} uid 
  * @returns {{id: string, email: string, displayName: string, bio: string}}
  */
 // Creamos esta función porque antes veníamos trayendo el displayName, el email y el id desde el Authentication, pero la bio la tenemos en un document dentro de la collection 'users'. Así que ahora vamos a traer TODOS los datos del document específico del usuario
-export async function getUserProfileByID(id) { // recibe como parámetro el uid del usuario
+export async function getUserProfileByID(uid) { // recibe como parámetro el uid del usuario
     // creamos una referencia al documento con los registro del usuario
-    const profileDocumentRef = doc(db, `/users/${id}`) // en la colletion 'users', los documents tienen como id el uid del usuario del cual contienen la inforamción. Así que haciendo `/users/${id}` estamos teniendo la referencia al docuemento con los registros del usuario especificado
+    const profileDocumentRef = doc(db, `/users/${uid}`) // en la colletion 'users', los documents tienen como id el uid del usuario del cual contienen la inforamción. Así que haciendo `/users/${id}` estamos teniendo la referencia al docuemento con los registros del usuario especificado
     const profileSnapshot = await getDoc(profileDocumentRef) // con getDoc() traemos los registros de un documento. Como parámetro hay que pasarle la referencia del document del cual queremos traer los datos
 
     // como respuesta vamos a retornar un objeto con los datos del documento (osea los datos del usuario)
@@ -75,9 +75,21 @@ export async function createUserProfile(id, {email}) {
 
 
 // Función para obtener el displayName de un usuario por su ID. La utilizo para poder poner los user_name de manera dinámica, cosa que si el usuario lo actualiza, se va a cambiar también en los posts que haya realizado y en los comentarios también
-export async function getDisplayNameByUserId(id) {
-    const profileRef = doc(db, `/users/${id}`)
-    const profileSnapshot = await getDoc(profileRef)
-    // si no tiene displayName ponemos el email y en caso contrario el displayName
-    return profileSnapshot.data().displayName && profileSnapshot.data().displayName !== "" ? profileSnapshot.data().displayName : profileSnapshot.data().email
+export async function getDisplayNameByUserId(uid) {
+    // creamos la referencia al documento dentro de la collection 'users'. En esta collection los documentos tienen los registros (datos) de los users autenticados (como la biografía). Estos docuementos tienen como id de docuemnto, el uid del user
+    const profileDocumentRef = doc(db, `/users/${uid}`)
+    const profileSnapshot = await getDoc(profileDocumentRef) // obtenemos el documentos con getDoc, que como parámetro recibe la referencia al documento del que se quiere obtener los registros
+    
+    // si no tiene displayName ponemos el email
+    return profileSnapshot.data().displayName && profileSnapshot.data().displayName !== "" ? profileSnapshot.data().displayName : profileSnapshot.data().email.split("@")[0];
+    /* Explicación de este condicional
+    "profileSnapshot.data().displayName" => si existe el atributo displayName dentro de data() de profileSnapshot
+    "&& profileSnapshot.data().displayName !== ''" => y además este displayName tiene algo escrito
+    "? profileSnapshot.data().displayName" => en caso de que las dos sean true vamos a retornar el displayName
+    ": profileSnapshot.data().email.split("@")[0];" => en caso de que alguna de las dos sean false significa que no tiene display name, así que retornamos lo que sea que esté escrito antes del @ en el email
+
+    Explicación del split:
+    Si el user tiene como mail mirkoIuliano@gmail.com
+    Se va a poner como user mirkoIuliano
+    */
 }

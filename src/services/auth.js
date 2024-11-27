@@ -103,6 +103,7 @@ export async function login({email, password}) {
     }
 }
 
+
 // creamos la función para registrarnos (crear cuenta)
 export async function register({email, password}) {
     try {
@@ -124,9 +125,6 @@ export async function register({email, password}) {
         throw error
     }
 }
-
-
-
 
 
 /**
@@ -237,7 +235,13 @@ export function getAuthenticatedUser() {
 | 
 | 
 +--------------------------------------------------------------------------------*/
-
+/*
+Este patrón permite que partes de la aplicación "escuchen" cambios en los datos del usuario autenticado (loggedUser).
+¿Cómo funciona?
+Los "observers" son funciones que se ejecutan automáticamente cuando loggedUser cambia
+Cada vez que se actualiza loggedUser, notificas a todos los observers
+Ejemplo: Si loggedUser cambia (como al iniciar sesión), se puede actualizar la interfaz automáticamente
+*/
 // Vamos a crear 3 funciones que vamos a usar para implementar el observer:
 /**
  * 
