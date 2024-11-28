@@ -7,6 +7,7 @@ import Login from '../pages/Login.vue';
 import Register from '../pages/Register.vue';
 import MyProfile from "../pages/MyProfile.vue";
 import MyProfileEdit from "../pages/MyProfileEdit.vue";
+import MyProfileEditPhoto from "../pages/MyProfileEditPhoto.vue";
 import { subscribeToAuthChanges } from "../services/auth";
 // importamos subscribeToAuthChanges para poder saber si el usuario está o no autenticado (esto lo sabemos con subscribeToAuthChanges y sus observers)
 // import { subscribeToAuthChanges } from "../services/auth";
@@ -49,6 +50,14 @@ const routes = [
     {
         path:'/mi-perfil/editar', 
         component: MyProfileEdit,
+        // agregamos un campo 'meta' a las rutas que requieren autenticación
+        meta: { // los campos meta son campos que le podemos agregar a cualquier ruta, para asignarles el valor que querramos
+            requireAuth: true // el usuario va a necesitar estar autenticado para acceder a esta ruta
+        }
+    },
+    {
+        path:'/mi-perfil/editar/foto', 
+        component: MyProfileEditPhoto,
         // agregamos un campo 'meta' a las rutas que requieren autenticación
         meta: { // los campos meta son campos que le podemos agregar a cualquier ruta, para asignarles el valor que querramos
             requireAuth: true // el usuario va a necesitar estar autenticado para acceder a esta ruta

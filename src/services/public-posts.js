@@ -80,6 +80,19 @@ export async function subscribeToPublicPosts(callback) // va a recibir un callba
                     book_title: doc.data().book_title || "",
                     review: doc.data().review || "",
                     comments: doc.data().comments || [], // si falta, devuelve un array vacío
+                    
+                    /* min 21 clase 9
+                    created_at lo creamos en savePublicPosts usando serverTimestamp. serverTimestamp define un sentinela, que es un indicador para que firebase sepa que el valor de ese campo se tiene que llenar en el servidor. Deja una indicación de que cuando se grabe en el servidor, use la fecha y hora del servidor para guardarse
+                    Como esto recién se crea y se guarda cuando graba en el servidor, en esta primera presentación de los datos, que es local y todavía no se grabó, created_at no se grabó y sería null
+                    Para resolver este problema usamos el optional chain operator para pedir la fecha (es el signo de pregunta '?')
+                    Operador de encadenación opcional
+                    Es lo mismo que el '.', pero antes hace un chequeo
+                    El '.' pide a lo que sea que haya antes una propiedad. Si es null, intenta pedir una propiedad a null y falla porque null no tiene propiedades
+                    Con el '?.' se encarga de que, solo se encadena si el valor anterior no es null o undefined (osea si hay un valor en serio)
+                    Es una forma mucho más abreviada de hacer esto:
+                    created_at: doc.data().created_at ? doc.data().created_at.toDate() : null
+                    */
+                    created_at: doc.data().created_at?.toDate(), // el método toDate() es un método que nos da firebase que sirve para transformar el timestamp que tenemos con created_at y lo convierte a un objeto Date de JS
                 }
             })
         ) 
@@ -147,6 +160,7 @@ export async function getPostsByUserId(callback) {
                     book_title: doc.data().book_title || "",
                     review: doc.data().review || "",
                     comments: doc.data().comments || [], // si falta, devuelve un array vacío
+                    created_at: doc.data().created_at?.toDate(), // si falta, devuelve un array vacío
                 }
             })
         ) 

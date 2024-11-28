@@ -3,6 +3,7 @@
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
 import { auth } from "./firebase";
 import { createUserProfile, getUserProfileByID, updateUserProfile } from "./user-profile";
+import { getFileURL, uploadFile } from "./file-storage";
 
 // Creamos una variable donde vamos a tenre los datos del usuario autenticado (si es que existe)
 let loggedUser = {
@@ -10,6 +11,7 @@ let loggedUser = {
     email: null,
     displayName: null,
     bio: null,
+    photoURL: null,
     fullyLoaded: false,
 }
 
@@ -55,6 +57,7 @@ onAuthStateChanged // onAuthStateChanged() recibe un callback como parámetro, q
                 id: user.uid, //  En el usuario de Firebase Authentication, el id se llama 'uid' (unique id)
                 email: user.email, 
                 displayName: user.displayName, 
+                photoURL: user.photoURL,
             })
 
             // Buscamos ahora el resto de datos del perfil. Estos otros datos se encuentran en la collection 'users', en el document respectivo del usuario
@@ -76,6 +79,7 @@ onAuthStateChanged // onAuthStateChanged() recibe un callback como parámetro, q
                 email: null,
                 displayName: null,
                 bio: null,
+                photoURL: null,
                 fullyLoaded: false,
             }
         )
@@ -126,7 +130,7 @@ export async function register({email, password}) {
 
 
 /**
- * Esta es la función para editar mi perfil y poder ponerle un nombre de usuario, biografía y la carrera
+ * Esta es la función para editar mi perfil y poder ponerle un nombre de usuario y biografía
  * 
  * @param {{displayName: string, bio: string}} data
  * @returns {Promise<null>} 
@@ -295,4 +299,32 @@ function updateLoggedUser(newData){
     }
     localStorage.setItem('user', JSON.stringify(loggedUser)) // acá lo guardamos en localStorage
     notifyAll() // acá notificamos a los observers
+}
+
+
+/**
+ * @param {File} photo
+ */
+export async function editMyProfilePhoto(photo){
+    try {
+        // Generamos la ruta donde queremos guardar el archivo
+        // La forma que le vamos a dar es: "users/idDelUsuario/archivo" => osea vamos a crear una carpeta users, dentro de la cual cada usuario va a tener con su id una carpeta y ahí va a guardar el archivo
+        const filepath = `users/${loggedUser.id}/avatar.jpg` // TODO: Manejar otras extensiones
+
+        await uploadFile(filepath, photo)
+
+        
+        // Guardamos la foto
+        // primero traemos la url de la foto
+        const photoURL = await getFileURL(filepath)
+        const promiseAuth = updateProfile(auth.currentUser, {photoURL})
+        const promiseFirestore = updateUserProfile(loggedUser.id, {photoURL})
+
+        await Promise.all([promiseAuth, promiseFirestore])
+
+        updateLoggedUser({photoURL})
+    } catch (error) {
+        console.error('[auth.js editMyProfilePhoto] Error al tratar de editar la foto de perfil: ', error)
+        throw error
+    }
 }

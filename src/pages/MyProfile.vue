@@ -4,6 +4,7 @@ import { subscribeToAuthChanges } from '../services/auth';
 import { addCommentToPost, getPostsByUserId } from '../services/public-posts';
 import { auth } from '../services/firebase';
 import { getDisplayNameByUserId } from '../services/user-profile';
+import NoPhoto from '/imgs/no-photo.png'
 
 // creamos "unsubscribeFromAuth()" y la definimos como una función vacía. Esto lo hacemos porque después vamos a guardar en ella una función para desuscribirnos de los cambio de autenticación
 let unsubscribeFromAuth = () => {} 
@@ -12,8 +13,11 @@ const loggedUser = ref({
     id: null,
     email: null,
     displayName: null,
+    photoURL: null,
     bio: null,
 })
+
+const loading = ref(false)
 
 const posts = ref([])
 
@@ -50,6 +54,13 @@ onMounted(() => {
 
 async function handleComment (postId, user_comment )
 {
+    // Preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
+    if(loading.value) return; // Si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
+
+    console.log("mandando comentario")
+
+    loading.value = true
+
     // uso auth.currentUser para saber si hay o no un usuario autenticado 
     if (auth.currentUser){ // si el usuario que quiere comentar está autenticado:
         await addCommentToPost( postId, // llamos a la función addCommentToPost de [public-posts.js]. Como primer parámetro le enviamos el id del documento (osea el id del posteo al que el comentario pertenece)
@@ -63,6 +74,8 @@ async function handleComment (postId, user_comment )
         router.push('/iniciar-sesion')
     }
 
+    loading.value = false
+
      // Limpiamos los campos de comentario solo para el post correspondiente
     const post = posts.value.find(post => post.id === postId);
     post.commentsModel.user_comment = "";
@@ -73,25 +86,73 @@ onUnmounted(() => {
     unsubscribeFromAuth()
 })
 
+/**
+ * 
+ * @param {Date|null} date
+ * @returns {string} La fecha con formato "DD/MM/AAAA hh:ii". Retorna null si date es null.
+ */
+function formatDate(date){
+    // hacemos esto es null por lo que explica en clase 9 min 27. Básicamente es para solventar un problema de desincronización entre horario de PC y horario del servidor (que es la hora real que se toma)
+    if(!date) return null // después cuando subamos un post vamos a poder poner 'Subiendo post...' gracias a esto
+
+    // Vamos a formatear la fecha usando la clase Intl.DateTimeFormat() --> es nativo de JS
+    const formatter = new Intl.DateTimeFormat('es-AR', 
+    { // como segundo parámetro vamos a poder pasar un objeto de confiruación sobre el formato. Esto lo hacemos porque sino, si el número del día es de un solo dígito aparecería así: 1/10/2022. Con esta configuración aparecería como 01/11/2022
+        day: '2-digit',
+        month: '2-digit',
+        year:'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false, // así le pedimos que no nos use el formato de p.m y a.m y que llegue hasta 24hs
+
+    })
+
+    // Usamos el formateador que creamos para darle la forma al Date
+    return formatter.format(date).replace(',', '') // usamos replace para sacarle la coma y en su lugar no poner nada
+                                    // sin replace se vería: 24/11/2024, 19:46
+                                    // con replace se vería: 24/11/2024 19:46 (sin la coma en el medio)
+}
+
 </script>
 
 <template>
+    
     <div class="flex items-end gap-4">
         <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Mi Perfil</h2>
         <router-link 
             to="/mi-perfil/editar"
             class="mb-4 text-blue-700 underline"
         >Editar</router-link>
+        <router-link 
+            to="/mi-perfil/editar/foto"
+            class="mb-4 text-blue-700 underline"
+        >Editar foto</router-link>
     </div>
 
-    <div class="mb-4">{{ loggedUser.bio || "Acá va mi biografía..." }}</div>
-    
-    <dl>
-        <dt class="font-bold">Email</dt>
-        <dd class="mb-3">{{ loggedUser.email }}</dd>
-        <dt class="font-bold">Nombre de Usuario</dt>
-        <dd class="mb-3">{{ loggedUser.displayName || "No especificado..." }}</dd>
-    </dl>
+    <div class="flex gap-4 items-start">
+        <div class="w-1/6 bg-slate-400">
+            <img 
+                :src="loggedUser.photoURL || NoPhoto" 
+                alt=""
+            >
+            <!-- En vez de usar como componente (NoPhoto) podemos llamar a la foto directamente así:
+            <img 
+                :src="loggedUser.photoURL || '/imgs/no-photo.png'" 
+                alt=""
+            >
+            -->
+        </div>
+        <div>
+            <div class="mb-4">{{ loggedUser.bio || "Acá va mi biografía..." }}</div>
+            <dl>
+                <dt class="font-bold">Email</dt>
+                <dd class="mb-3">{{ loggedUser.email }}</dd>
+                <dt class="font-bold">Nombre de Usuario</dt>
+                <dd class="mb-3">{{ loggedUser.displayName || "No especificado..." }}</dd>
+            </dl>
+        </div>
+    </div>
+
 
     <!-- Posts creados por el usuario -->
     <article v-for="post in posts" class="w-2/4 border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8">
@@ -99,7 +160,7 @@ onUnmounted(() => {
     <div class="mb-3 flex items-center justify-between">
         <div>
             <h3 class="text-2xl font-semibold text-slate-800">{{post.book_title}}</h3>
-            <p class="text-sm font-semibold text-slate-400 p-0 m-0">Publicado el DD/MM/YYYY</p>
+            <p class="text-sm font-semibold text-slate-400 p-0 m-0">{{ formatDate(post.created_at) || 'Subiendo post...' }}</p>
         </div>
         <p class="mr-4 font-semibold text-slate-500">@{{post.user_name}}</p>
     </div>
@@ -127,7 +188,7 @@ onUnmounted(() => {
                     v-model="post.commentsModel.user_comment"
                     placeholder="Ingresar comentario..."
                 >
-                <button class="ml-2 bg-slate-800 text-white px-4 py-1 rounded-md font-medium text-base hover:bg-slate-700 transition-colors duration-200">Comentar</button>
+                <button class="ml-2 bg-slate-800 text-white px-4 py-1 rounded-md font-medium text-base hover:bg-slate-700 transition-colors duration-200">{{ !loading ? 'Comentar' : 'Enviando...'}}</button>
             </div>
         </form>
     </div>
