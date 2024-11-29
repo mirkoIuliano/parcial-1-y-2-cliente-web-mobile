@@ -4,7 +4,7 @@ import { subscribeToAuthChanges } from '../services/auth';
 import { addCommentToPost, getPostsByUserId } from '../services/public-posts';
 import { auth } from '../services/firebase';
 import { getDisplayNameByUserId } from '../services/user-profile';
-import NoPhoto from '/imgs/no-photo.png'
+import ProfileData from '../components/ProfileData.vue';
 
 // creamos "unsubscribeFromAuth()" y la definimos como una función vacía. Esto lo hacemos porque después vamos a guardar en ella una función para desuscribirnos de los cambio de autenticación
 let unsubscribeFromAuth = () => {} 
@@ -116,43 +116,8 @@ function formatDate(date){
 </script>
 
 <template>
-    
-    <div class="flex items-end gap-4">
-        <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Mi Perfil</h2>
-        <router-link 
-            to="/mi-perfil/editar"
-            class="mb-4 text-blue-700 underline"
-        >Editar</router-link>
-        <router-link 
-            to="/mi-perfil/editar/foto"
-            class="mb-4 text-blue-700 underline"
-        >Editar foto</router-link>
-    </div>
 
-    <div class="flex gap-4 items-start">
-        <div class="w-1/6 bg-slate-400">
-            <img 
-                :src="loggedUser.photoURL || NoPhoto" 
-                alt=""
-            >
-            <!-- En vez de usar como componente (NoPhoto) podemos llamar a la foto directamente así:
-            <img 
-                :src="loggedUser.photoURL || '/imgs/no-photo.png'" 
-                alt=""
-            >
-            -->
-        </div>
-        <div>
-            <div class="mb-4">{{ loggedUser.bio || "Acá va mi biografía..." }}</div>
-            <dl>
-                <dt class="font-bold">Email</dt>
-                <dd class="mb-3">{{ loggedUser.email }}</dd>
-                <dt class="font-bold">Nombre de Usuario</dt>
-                <dd class="mb-3">{{ loggedUser.displayName || "No especificado..." }}</dd>
-            </dl>
-        </div>
-    </div>
-
+    <ProfileData :user="loggedUser"/>
 
     <!-- Posts creados por el usuario -->
     <article v-for="post in posts" class="w-2/4 border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8">
@@ -162,11 +127,16 @@ function formatDate(date){
             <h3 class="text-2xl font-semibold text-slate-800">{{post.book_title}}</h3>
             <p class="text-sm font-semibold text-slate-400 p-0 m-0">{{ formatDate(post.created_at) || 'Subiendo post...' }}</p>
         </div>
-        <p class="mr-4 font-semibold text-slate-500">@{{post.user_name}}</p>
+        <router-link 
+            :to="`/usuario/${post.user_id}`"
+            class="mr-4 font-semibold text-blue-800 hover:text-blue-600 transition-colors duration-200"
+        >
+            <p class="mr-4">@{{post.user_name}}</p>
+        </router-link>
     </div>
 
-    <div class="mb-5">
-        <p>{{post.review}}</p>
+    <div class="whitespace-pre-wrap break-words font-sans text-base mb-5 p-5 border-b-2">
+        {{ post.review }}
     </div>
 
     <!-- Comentarios -->

@@ -76,6 +76,7 @@ export async function subscribeToPublicPosts(callback) // va a recibir un callba
                 // como respuesta retornamos un objeto que contiene:
                 return {
                     id: doc.id,
+                    user_id: doc.data().user_id,
                     user_name: displayName || "", // usamos displayName, que es el nombre dinámico
                     book_title: doc.data().book_title || "",
                     review: doc.data().review || "",
@@ -156,6 +157,7 @@ export async function getPostsByUserId(callback) {
                 const displayName = await getDisplayNameByUserId(doc.data().user_id) // getDisplayNameByUserId() es una función de [user-profile.js] que sirve para obtener el nombre de usuario (displayName) de manera dinámica. Sin esta función, si guardamos user_name: doc.data().user_name, va a quedar estático y si se cambia el nombre va a seguir el nombre anterior en vez del actualziado
                 return {
                     id: doc.id,
+                    user_id: doc.data().user_id,
                     user_name: displayName, // usamos displayName, que es el nombre dinámico
                     book_title: doc.data().book_title || "",
                     review: doc.data().review || "",

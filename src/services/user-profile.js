@@ -37,7 +37,7 @@ export async function updateUserProfile(uid, data) { // data sería un objeto co
  * Esta función va a retornar todos los datos del documento del usuario
  * 
  * @param {string} uid 
- * @returns {{id: string, email: string, displayName: string, bio: string}}
+ * @returns {{id: string, email: string, displayName: string, bio: string, photoURL: string|null}}
  */
 // Creamos esta función porque antes veníamos trayendo el displayName, el email y el id desde el Authentication, pero la bio la tenemos en un document dentro de la collection 'users'. Así que ahora vamos a traer TODOS los datos del document específico del usuario
 export async function getUserProfileByID(uid) { // recibe como parámetro el uid del usuario
@@ -51,6 +51,7 @@ export async function getUserProfileByID(uid) { // recibe como parámetro el uid
         email: profileSnapshot.data().email,
         displayName: profileSnapshot.data().displayName,
         bio: profileSnapshot.data().bio,
+        photoURL: profileSnapshot.data().photoURL,
     }
 }
 

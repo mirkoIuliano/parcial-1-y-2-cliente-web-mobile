@@ -24,10 +24,17 @@ const posts = ref(
     ]
 ) */
 
+const loading = ref(false)
+
 const router = useRouter(); 
 
 async function handleComment (postId, user_comment )
 {
+    // Preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
+    if(loading.value) return; // Si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
+
+    loading.value = true
+
     // uso auth.currentUser para saber si hay o no un usuario autenticado 
     if (auth.currentUser){
         // addCommentToPost de [publi-posts] es una función que agrega un comentario en el array comments del deocument del posteo específico 
@@ -43,6 +50,8 @@ async function handleComment (postId, user_comment )
         alert("Para comentar es necesario iniciar sesión primero")
         router.push('/iniciar-sesion')
     }
+
+    loading.value = false
 
     // Limpiamos los campos de comentario solo para el post correspondiente
     const post = posts.value.find(post => post.id === postId);
@@ -175,11 +184,16 @@ function formatDate(date){
                     <!-- <p class="text-sm font-semibold text-slate-400 p-0 m-0">Publicado el DD/MM/YYYY</p> -->
                     <p class="text-sm font-semibold text-slate-400 p-0 m-0">{{ formatDate(post.created_at) || 'Subiendo post...' }}</p>
                 </div>
-                <p class="mr-4 font-semibold text-slate-500">@{{post.user_name}}</p>
+                <router-link 
+                    :to="`/usuario/${post.user_id}`"
+                    class="mr-4 font-semibold text-blue-800 hover:text-blue-600 transition-colors duration-200"
+                >
+                    <p class="mr-4">@{{post.user_name}}</p>
+                </router-link>
             </div>
 
-            <div class="mb-5">
-                <p>{{post.review}}</p>
+            <div class="whitespace-pre-wrap break-words font-sans text-base mb-5 p-5 border-b-2">
+                {{ post.review }}
             </div>
 
             <!-- Comentarios -->
@@ -201,7 +215,7 @@ function formatDate(date){
                             v-model="post.commentsModel.user_comment"
                             placeholder="Ingresar comentario..."
                         >
-                        <button class="ml-2 bg-slate-800 text-white px-4 py-1 rounded-md font-medium text-base hover:bg-slate-700 transition-colors duration-200">Comentar</button>
+                        <button class="ml-2 bg-slate-800 text-white px-4 py-1 rounded-md font-medium text-base hover:bg-slate-700 transition-colors duration-200">{{ !loading ? 'Comentar' : 'Enviando...'}}</button>
                     </div>
                 </form>
             </div>
