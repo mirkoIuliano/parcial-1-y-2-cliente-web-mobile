@@ -1,9 +1,10 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
-import { subscribeToPublicPosts } from '../services/public-posts'
-import { getDisplayNameByUserId } from '../services/user-profile';
+import { onMounted, ref } from 'vue';
+import { subscribeToPublicPosts, addCommentToPost } from './src/services/public-posts'
+import { useRouter } from 'vue-router';
+import { auth } from './src/services/firebase';
+import { getDisplayNameByUserId } from './src/services/user-profile';
 import PostCard from '../components/PostCard.vue';
-import { subscribeToAuthChanges } from '../services/auth';
 
 
 // dentro de esta variable vamos a guardar todos los registros (osea todos los posteos) de la base de datos
@@ -24,21 +25,42 @@ const posts = ref(
     ]
 ) */
 
-// creamos "unsubscribeFromAuth()" y la definimos como una función vacía. Esto lo hacemos porque después vamos a guardar en ella una función para desuscribirnos de los cambio de autenticación
-let unsubscribeFromAuth = () => {} 
+const loading = ref(false)
 
-const loggedUser = ref({
-    id: null,
-    email: null,
-    displayName: null,
-    photoURL: null,
-    bio: null,
-})
+const router = useRouter(); 
+
+async function handleComment (postId, user_comment )
+{
+    // Preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
+    if(loading.value) return; // Si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
+
+    loading.value = true
+
+    // uso auth.currentUser para saber si hay o no un usuario autenticado 
+    if (auth.currentUser){
+        // addCommentToPost de [publi-posts] es una función que agrega un comentario en el array comments del deocument del posteo específico 
+        await addCommentToPost( postId, // el primer parámetro es el id del document del post
+        { // el segundo parámetro es un objeto con el comnetario y el id del usuario que lo comentó
+            user_comment,
+            comment_user_id: auth.currentUser.uid
+            // console.log(auth.currentUser.uid)
+        }
+    )
+} else {
+    // si quiere comentar y no está autenticado lo redireccionamos a página de iniciar sesión
+        alert("Para comentar es necesario iniciar sesión primero")
+        router.push('/iniciar-sesion')
+    }
+
+    loading.value = false
+
+    // Limpiamos los campos de comentario solo para el post correspondiente
+    const post = posts.value.find(post => post.id === postId);
+    post.commentsModel.user_comment = "";
+}
 
 // Cuando se monte el componente leemos los posteos de Firestore
 onMounted( async () => {
-
-    unsubscribeFromAuth = subscribeToAuthChanges(newUserData => loggedUser.value = newUserData)
 
     // llamamos a la función "subscribeToPublicPosts()" que sirve para recibir todos los posteos de la base de datos
     subscribeToPublicPosts( async (newPosts) => { // newPosts es una lista con todas las publicaciones
@@ -105,11 +127,6 @@ onMounted( async () => {
     })
 }) 
 
-onUnmounted(() => {
-    // Cuando se desmonte vamos a cancelar la suscripción
-    unsubscribeFromAuth()
-})
-
 
 </script>
 
@@ -133,10 +150,9 @@ onUnmounted(() => {
 
     <section>
         <PostCard 
-            v-for="post in posts"
-            :key="post.id" 
-            :post="post"
-            :loggedUser="loggedUser"
+            :key="posts.id" 
+            :posts="posts" 
+            :handleComment="handleComment" 
         />
     </section>
 </template>

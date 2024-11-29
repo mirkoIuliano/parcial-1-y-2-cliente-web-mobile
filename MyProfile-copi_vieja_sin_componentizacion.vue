@@ -1,7 +1,8 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
 import { subscribeToAuthChanges } from '../services/auth';
-import { getPostsByUserId } from '../services/public-posts';
+import { addCommentToPost, getPostsByUserId } from '../services/public-posts';
+import { auth } from '../services/firebase';
 import { getDisplayNameByUserId } from '../services/user-profile';
 import ProfileData from '../components/ProfileData.vue';
 import PostCard from '../components/PostCard.vue';
@@ -16,6 +17,8 @@ const loggedUser = ref({
     photoURL: null,
     bio: null,
 })
+
+const loading = ref(false)
 
 const posts = ref([])
 
@@ -50,6 +53,35 @@ onMounted(() => {
     })
 }) 
 
+async function handleComment (postId, user_comment )
+{
+    // Preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
+    if(loading.value) return; // Si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
+
+    console.log("mandando comentario")
+
+    loading.value = true
+
+    // uso auth.currentUser para saber si hay o no un usuario autenticado 
+    if (auth.currentUser){ // si el usuario que quiere comentar está autenticado:
+        await addCommentToPost( postId, // llamos a la función addCommentToPost de [public-posts.js]. Como primer parámetro le enviamos el id del documento (osea el id del posteo al que el comentario pertenece)
+        { // como segundo parámetro un objeto con los datos del comentario
+            user_comment, // el contenido del comentario
+            comment_user_id: auth.currentUser.uid // el uid del usuario autenticado que lo hizp
+        }
+    )
+} else {
+        alert("Para comentar es necesario iniciar sesión primero")
+        router.push('/iniciar-sesion')
+    }
+
+    loading.value = false
+
+     // Limpiamos los campos de comentario solo para el post correspondiente
+    const post = posts.value.find(post => post.id === postId);
+    post.commentsModel.user_comment = "";
+}
+
 onUnmounted(() => {
     // Cuando se desmonte vamos a cancelar la suscripción
     unsubscribeFromAuth()
@@ -61,11 +93,10 @@ onUnmounted(() => {
 
     <ProfileData :user="loggedUser"/>
 
-    <PostCard 
-        v-for="post in posts"
-        :key="post.id" 
-        :post="post"
-        :loggedUser="loggedUser"
+    <PostCard
+        :key="posts.id" 
+        :posts="posts" 
+        :handleComment="handleComment" 
     />
 
 </template>
