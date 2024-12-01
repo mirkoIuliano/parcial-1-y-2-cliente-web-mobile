@@ -101,7 +101,12 @@ function formatDate(date){
             <h4 class="font-semibold text-base text-slate-800">Comentarios:</h4>
             <ul>
                 <li v-for="comment in post.comments || []" class="text-slate-600 text-sm mt-2">
-                    <strong>@{{ comment.user_name }}:</strong> {{ comment.user_comment }}
+                    <router-link
+                        :to="`/usuario/${comment.comment_user_id}`"
+                    >
+                        <strong>@{{ comment.user_name }}:</strong> 
+                    </router-link>
+                    {{ comment.user_comment }}
                 </li>
             </ul>
 

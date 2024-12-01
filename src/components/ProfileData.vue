@@ -12,6 +12,17 @@ defineProps({
 </script>
 
 <template>
+    <div class="flex items-end gap-4">
+        <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Mi Perfil</h2>
+        <router-link 
+            to="/mi-perfil/editar"
+            class="mb-4 text-blue-700 underline"
+        >Editar</router-link>
+        <router-link 
+            to="/mi-perfil/editar/foto"
+            class="mb-4 text-blue-700 underline"
+        >Editar foto</router-link>
+    </div>
     <div class="flex gap-4 items-start">
         <div class="w-1/6 bg-slate-400">
             <img 
