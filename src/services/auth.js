@@ -188,12 +188,6 @@ export async function logout() {
     await signOut(auth)
 }
 
-// función para verificar si el usuario está autenticado
-export function getAuthenticatedUser() {
-    return loggedUser;
-}
-
-
 /*--------------------------------------------------------------------------------
 | Patrón de Diseño: Observar
 +---------------------------------------------------------------------------------

@@ -2,7 +2,6 @@ import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, w
 import { db } from "./firebase" // importamos la variable db que creamos en firebase. Esta es la referencia a la base y la necesitamos para poder escribir o leer datos de la base 
 import { arrayUnion, arrayRemove, updateDoc } from "firebase/firestore"
 import { auth } from "./firebase"
-import { getAuthenticatedUser } from "./auth"
 import { getDisplayNameByUserId } from "./user-profile"
 
 
@@ -123,33 +122,25 @@ export async function addCommentToPost(postId, comment) // como parámetros reci
 }
 
 
-export async function getPostsByUserId(callback) {
+export async function getPostsByUserId(userId, callback) {
 
     let userPostsQuery
 
     // Para leer los documentos de la collection "public-posts" empezamos por crear la referencia a dicha collection
     const publicPostsCollectionRef = collection(db, 'public-posts')
 
-
-    const user = getAuthenticatedUser()
-    /*
-    Uso getAuthenticatedUser() en vez de hacer ==> const user = auth.currentUser;
-    Porque si lo hago así, cuando entro a la página, 'user' va a ser null porque tarda en cargar todo lo de Authentication. Como es null, después en el if(user){...} no funciona
-    Si quiero ver, comentar el getAuthenticatedUser y poner la otra opción
-    Tampoco funciona si pongo ==> const user = await auth.currentUser;
-    */
-
-    if(user){ // si hay un user autenticado:
+    if(userId){ // si hay un user autenticado:
         // console.log("hay un usuario autenticado")
         // creo una query (consulta) para traer todos los documentos del usuario ordenados de manera descendente
         userPostsQuery = query(
             publicPostsCollectionRef, // le paso la referencia a la collection de donde quiero que traiga los documents
             orderBy('created_at', 'desc'), // ordenamos por fecha de creación, de manera descendente
             // y filtro para obtener solo las publicaciones del usuario autenticado
-            where('user_id', '==', user.id) // solo va a traer los documents que tengan user_id igual al user.id 
+            where('user_id', '==', userId) // solo va a traer los documents que tengan user_id igual al userId 
         )
     } else {
         // TODO: manejar error
+        console.error("no se envió ningún Id de usuario para buscar sus publicaciones")
     }
 
     // uso onSnapshot para que se actualice si alguien hace un nuevo comentario. Como primer parámetro le tenemos que pasar la referencia a la collection o una query y como segundo, la función callback

@@ -1,7 +1,10 @@
+/* 
+Este tiene la funcionalidad de hacer una búsqueda de un usuario específico y de tener un estado de carga
+*/
 import { onMounted, ref } from "vue"
 import { getUserProfileByID } from "../services/user-profile"
 
-export function useUser(id) {
+export function useUser(id) { // le tenemos que pasar un id como parámetro
     // en esta variable guardamos todos los datos del usuario del cual se está viendo el perfil
     const user = ref({
         id: null,

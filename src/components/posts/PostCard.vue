@@ -33,7 +33,7 @@ async function handleComment (postId, user_comment )
         alert("Para comentar es necesario iniciar sesión primero")
         router.push('/iniciar-sesion')
     } else {
-        // addCommentToPost de [publi-posts] es una función que agrega un comentario en el array comments del document del posteo
+        // addCommentToPost de [publi-posts.js] es una función que agrega un comentario en el array comments del document del posteo
         await addCommentToPost( postId, // el primer primer parámetro es el id del documento (osea, el id del posteo al que el comentario pertenece)
         { // como segundo parámetro un objeto con los datos del comentario
             user_comment, // el contenido del comentario
@@ -117,8 +117,8 @@ function formatDate(date){
                         class="px-4 py-1 border border-slate-300 rounded-md w-10/12 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                         v-model="post.commentsModel.user_comment" placeholder="Ingresar comentario...">
                     <button
-                        class="ml-2 bg-slate-800 text-white px-4 py-1 rounded-md font-medium text-base hover:bg-slate-700 transition-colors duration-200">{{
-                            !loading ? 'Comentar' : 'Enviando...'}}</button>
+                        class="ml-2 bg-slate-800 text-white px-4 py-1 rounded-md font-medium text-base hover:bg-slate-700 transition-colors duration-200"
+                        >{{!loading ? 'Comentar' : 'Enviando...'}}</button>
                 </div>
             </form>
         </div>

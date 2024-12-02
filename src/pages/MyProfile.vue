@@ -13,7 +13,7 @@ const posts = ref([])
 
 onMounted(() => {
 
-    getPostsByUserId(async (userPosts) => { // userPosts es el resultado de getPostsByUserId()
+    getPostsByUserId(loggedUser.value.id ,async (userPosts) => { // userPosts es el resultado de getPostsByUserId()
         // al array posts le vamos a agregar lo siguiente
         posts.value = await Promise.all(
             userPosts.map(async (userPost) => { // hacemos un map de userPosts y ahora 'userPost' va a representar a cada uno de los docuemntos del usuario

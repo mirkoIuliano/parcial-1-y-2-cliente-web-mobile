@@ -1,4 +1,6 @@
 /*
+Este archivo tiene la funcionalidad de suscribirnos a los cambios de autenticación y así poder tener la variable loggedUser con los datos del usuario autenticado
+
 Como venimos repitiendo código para suscribirnos a los cambios de autenticación y poder tenre una variable con el usuario logueado, creamos una componente con una función componible que tenga esta funcionalidad y que podamos invocar en diferentes compoentenes
 
 Le ponemos en el nombre de la función el mismo 'use' que también existe en funciones de Vue como useRouter, useRoute, etc

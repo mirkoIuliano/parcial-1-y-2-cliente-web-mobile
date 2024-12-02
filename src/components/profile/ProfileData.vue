@@ -1,3 +1,6 @@
+<!-- 
+Este es un componente en el que está la foto de perfil del usuario y sus datos
+-->
 <script setup>
 import NoPhoto from '/imgs/no-photo.png'
 
