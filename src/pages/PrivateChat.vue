@@ -1,3 +1,6 @@
+<!-- 
+A este archivo se entra cliqueando en chat privado y en la url se enceuntra el :id del user del cual es el chat
+-->
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';

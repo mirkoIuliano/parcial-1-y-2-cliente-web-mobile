@@ -42,7 +42,7 @@ La estructura va a quedar algo así:
 Tenemos una Collection de chat privados
 En su interior va a teber como Document un idChat1
 Dentro va a tener una propiedad de users, que va a ser un mapa que va a tener como vlaves los ids de los usuarios participantes 
-Y dentro va a tener una subCollection messages
+Y dentro va a tener una subcollection messages
 Que dentro va a tener un Document con el id de cada mensaje, que va a tener los datos de quien lo mandó (user_id), el texto (text) y la fecha de creació (created_at)
 
 
@@ -60,25 +60,24 @@ import { db } from "./firebase";
  * @param {string} receiverId 
  * @param {string} text 
  */
-export async function savePrivateChatMessage(senderId, receiverId, text) // para grabar un mensaje necesitamos saber: en qué sala de chat es, por lo cual necesito que me pasen los ids de los dos usuarios y el contenido del mensaje
+export async function savePrivateChatMessage(senderId, receiverId, text) // para grabar un mensaje necesitamos saber en qué sala de chat es, por lo cual necesito que me pasen los ids de los dos usuarios y el contenido del mensaje
 {
-    // Como necesito el docuemnto de la conversación para poder anidar la subCollection adentro, lo primero que vamos a hacer es crear/encontrar el Docuement de la conversación privada entre los dos
+    // Como necesito el docuemnto de la conversación para poder anidar la subcollection dentro, lo primero que vamos a hacer es crear/encontrar el Docuement de la conversación privada entre los dos
     // Primero buscamos y vemos si ya existe
     const chatCollectionRef = collection(db, 'private-chats')
-    const chatQuery = query(chatCollectionRef, where( // la función where recibe dos paráemtros: el primero es el nombre de la propiedad del docuemtno que quiereo buscar, el segundo es el operador y el tercero el valor 
+    const chatQuery = query(chatCollectionRef, where( // la función where recibe tres paráemtros: el primero es el nombre de la propiedad del docuemtno que quiereo buscar, el segundo es el operador y el tercero el valor 
         'users', '==', {
             [senderId] : true,
             [receiverId] : true,
         }
     ), limit(1)) // lo limitamos para que solo traiga el Primer registro de la base de datos
-    // como se que solo puede haber un docuemtno entre estos usuarios, el limit se asegura de que una vez que encuentre ese documento deje de buscar (esto es importante porque si tenemos 10 millones de docuemtnos, si lo encontra no va a tener que termianr con los que le faltan)
+    // como se que solo puede haber un docuemento entre estos usuarios, el limit se asegura de que una vez que encuentre ese documento deje de buscar (esto es importante porque si tenemos 10 millones de docuemtnos, si lo encuentra no va a tener que buscar en los que le faltan)
 
-    const chatSnapshot = await getDocs(chatQuery) // usamos getDocs en vez de getDoc, porque, si bien sabemos que en este caso solo puede haber un docuemetno, getDoc solo sirve cuando se el id exacto
+    const chatSnapshot = await getDocs(chatQuery) // usamos getDocs en vez de getDoc porque, si bien sabemos que en este caso solo puede haber un docuemetno, getDoc solo sirve cuando yo sé el id exacto
     
     let chatDoc
     
-    
-    if(chatSnapshot.empty) // si el snapshot está vacío creamos un docuemtno porque no encontramos nada
+    if(chatSnapshot.empty) // si el snapshot está vacío creamos un docuemtno porque no encontramos un document que tenga los mismos senderId y receiverId. Como no encontró significa que es un chat privado nuevo y que se tiene que crear un nuevo documento
     {
         chatDoc = await addDoc(chatCollectionRef, {
             users: {
@@ -88,19 +87,19 @@ export async function savePrivateChatMessage(senderId, receiverId, text) // para
         })
     } else {
         chatDoc = chatSnapshot.docs[0] // chatDoc va a ser el primero que se haya encontrado
-
     }
 
     
 
-    // Ahora que tenemos el docuemntos (en chatRef), y especialmente su id, podemos grabar el mensaje en la subcollection de messages del documento
-    const messagesSubcollectionRef = collection(db, `private-chats/${chatDoc.id}/messages`) // Para referenciar una subcollection el trabajo es casi lo mismo que con una collection común. La gran diferencia es que el path va a tener 3 o más valores 
-    // La cantidad de segmentos que tiene que tener la url tiene que ser impar si hace referencia a una collection y cnatidades pares para apuntar docuemntos
-    // Es por eso que nosotros usamos 3 `private-chats/${chatDoc.id}/messages`
-    // Le esatmos diciendo que queremos crear la colección private-chats, dentro del docuemtno que se acaba de crear (chatDoc) y la subcolección de mensajes
+    // Ahora que tenemos el docuemntos (en chatDoc), y especialmente su id, podemos grabar el mensaje en la subcollection de messages del documento
+    const messagesSubcollectionRef = collection(db, `private-chats/${chatDoc.id}/messages`) // Para referenciar una subcollection el trabajo es casi lo mismo que con una collection normal. La gran diferencia es que el path va a tener 3 o más valores 
+    // La cantidad de segmentos que tiene que tener la url tiene que ser impar si hace referencia a una collection y cantidades pares para apuntar docuemntos
+    // Es por eso que nosotros usamos 3 `private-chats/${chatDoc.id}/messages` => messages sería la subcollection
+    // Le esatmos diciendo que queremos crear en la colección private-chats, dentro del docuemtno que se acaba de crear (chatDoc), la subcolección de mensajes
 
     // para pushear el mensaje adentro hacemos addDoc
-    await addDoc(messagesSubcollectionRef, {
+    await addDoc(messagesSubcollectionRef, // como primer parámetro le pasamos la referencia a la subcollection 'messages' donde van a estar los mensajes de la conversación
+    { // como segundo parámetro pasamos el contenido que va a tener cada mensaje. Pasamos un objeto con el id del usuario que envió el mensaje, el contenido y la fecha y hora de creación
         user_id: senderId,
         text,
         created_at: serverTimestamp(),
