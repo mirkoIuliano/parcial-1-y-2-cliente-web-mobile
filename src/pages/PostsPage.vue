@@ -1,10 +1,12 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { subscribeToPublicPosts } from '../services/public-posts'
 import { getDisplayNameByUserId } from '../services/user-profile';
-import PostCard from '../components/PostCard.vue';
-import { subscribeToAuthChanges } from '../services/auth';
+import PostCard from '../components/posts/PostCard.vue';
+import { useLoggedUser } from '../compossables/useLoggedUser';
 
+// creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 
+const { loggedUser } = useLoggedUser()
 
 // dentro de esta variable vamos a guardar todos los registros (osea todos los posteos) de la base de datos
 const posts = ref([])
@@ -24,21 +26,8 @@ const posts = ref(
     ]
 ) */
 
-// creamos "unsubscribeFromAuth()" y la definimos como una función vacía. Esto lo hacemos porque después vamos a guardar en ella una función para desuscribirnos de los cambio de autenticación
-let unsubscribeFromAuth = () => {} 
-
-const loggedUser = ref({
-    id: null,
-    email: null,
-    displayName: null,
-    photoURL: null,
-    bio: null,
-})
-
 // Cuando se monte el componente leemos los posteos de Firestore
 onMounted( async () => {
-
-    unsubscribeFromAuth = subscribeToAuthChanges(newUserData => loggedUser.value = newUserData)
 
     // llamamos a la función "subscribeToPublicPosts()" que sirve para recibir todos los posteos de la base de datos
     subscribeToPublicPosts( async (newPosts) => { // newPosts es una lista con todas las publicaciones
@@ -104,12 +93,6 @@ onMounted( async () => {
         )
     })
 }) 
-
-onUnmounted(() => {
-    // Cuando se desmonte vamos a cancelar la suscripción
-    unsubscribeFromAuth()
-})
-
 
 </script>
 

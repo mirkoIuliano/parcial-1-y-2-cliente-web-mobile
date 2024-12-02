@@ -70,6 +70,7 @@ export async function subscribeToPublicPosts(callback) // va a recibir un callba
     // Esta función recibe 2 argumentos:
     // 1. La referencia de la collection o una query  2. El callback a ejecutar cada vez que haya cambios en la base de datos. Este callback recibe como parámetro el QuerySnapshot
     onSnapshot(postsQuery, async (snapshot) => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión
+        console.log("[public-posts.js subscribeToPublicPosts] Se ejecutó el onSnapshot")
         const newPosts = await Promise.all ( // como necesitamos llamar a la función asíncrona getDisplayNameByUserId() para obtener el displayName, usamos Promise.all() para esperar a que todas las promesas de getDisplayNameByUserId se resuelvan antes de pasar los datos al callback
             snapshot.docs.map(async (doc) => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title, review, displayName, etc
                 const displayName = await getDisplayNameByUserId(doc.data().user_id) // getDisplayNameByUserId() es una función de [user-profile.js] que sirve para obtener el nombre de usuario (displayName) de manera dinámica. Sin esta función, si guardamos user_name: doc.data().user_name, va a quedar estático y si se cambia el nombre va a seguir el nombre anterior en vez del actualziado
@@ -105,6 +106,7 @@ export async function subscribeToPublicPosts(callback) // va a recibir un callba
 // Función para agregar un comentario al post
 export async function addCommentToPost(postId, comment) // como parámetros recibe el id del post y el contenido del comentario (el id del que comnetó y el contenido de ese comentario) 
 {
+    console.log("[public-posts.js addCommentToPost] Se ejecutó la función")
     // postDocumentRef va a tener la referencia al documento de la publicación específica
     const postDocumentRef = doc(db, 'public-posts', postId); // usamos doc para poder buscar en la collection 'public.posts' el documento específico al cual se le está agregando un comentario
 
@@ -152,6 +154,7 @@ export async function getPostsByUserId(callback) {
 
     // uso onSnapshot para que se actualice si alguien hace un nuevo comentario. Como primer parámetro le tenemos que pasar la referencia a la collection o una query y como segundo, la función callback
     onSnapshot(userPostsQuery, async (snapshot) => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión
+        console.log("[pubic-posts.js getPostsByUserId] Se ejecutó el onSnapshot")
         const userPosts = await Promise.all( // como necesitamos llamar a la función asíncrona getDisplayNameByUserId() para obtener el displayName, usamos Promise.all() para esperar a que todas las promesas de getDisplayNameByUserId se resuelvan antes de pasar los datos al callback
             snapshot.docs.map(async (doc) => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title y review
                 const displayName = await getDisplayNameByUserId(doc.data().user_id) // getDisplayNameByUserId() es una función de [user-profile.js] que sirve para obtener el nombre de usuario (displayName) de manera dinámica. Sin esta función, si guardamos user_name: doc.data().user_name, va a quedar estático y si se cambia el nombre va a seguir el nombre anterior en vez del actualziado

@@ -1,36 +1,23 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { getUserProfileByID } from '../services/user-profile';
 import { useRoute } from 'vue-router';
-import ProfileData from '../components/ProfileData.vue';
+import ProfileData from '../components/profile/ProfileData.vue';
+import { useUser } from '../compossables/useUser';
 
 const route = useRoute()
 
-// en esta variable guardamos todos los datos del usuario del cual se está viendo el perfil
-const user = ref({
-    id: null,
-    email: null,
-    displayName: null,
-    photoURL: null,
-    bio: null,
-})
-
-const loading = ref(false)
-
 const id = route.params.id
 
-onMounted(async () => {
-    // Cuando monte queremos que traiga los datos del usuario
-    
-    loading.value = true
-    user.value = await getUserProfileByID(route.params.id)
-    loading.value = false
-
-})
+const { user, loading } = useUser(id)
 
 </script>
 
 <template>
     <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Perfil de {{ user.displayName || user.email }}</h2>
     <ProfileData :user="user"/>
+    <!-- link para ir a conversación privado con este usuario -->
+     <router-link 
+        :to="`/usuario/${user.id}/chat`"
+        class="mr-4 font-semibold text-blue-800 hover:text-blue-600 transition-colors duration-200"
+    > Conversación Privada con {{ user.displayName || user.email }}
+    </router-link>
 </template>
