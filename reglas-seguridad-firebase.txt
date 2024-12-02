@@ -1,0 +1,93 @@
+# Reglas de seguridad para Firestore y Storage
+En nuestro proyecto, estamos trabajando con la API pública de JS de Firebase.
+La API pública se llama así porque el acceso a la API, así como su uso, se realizan en el *cliente*. Todo lo que tiene que ver con los archivos de /services se ejecutan en la computadora del cliente.
+Esto, por la propia naturaleza de la situación, supone un riesgo de seguridad.
+
+Como ya sabemos de lo que tiene que ver con trabajar con bases de datos, la información  que guardamos tiene que estar debidamente protegida.
+No queremos que cualquiera pueda acceder a cualquier dato, ni que tampoco pueda modificar libremente cualquier registro, ni tampoco eliminar o crear registros sin algún control.
+
+En proyectos más tradicionales, el acceso a la base de datos está realizado directamente en el backend. Con lo cual ahí ya tenemos una primera capa de protección. No se puede realizar ninguna operación que nosotros no estemos contemplando que se pueda realizar desde nuestros archivos del backend.
+Lo "único" de lo que tenemos que cuidarnos, es de evitar ejecuciones no permitidas de los scripts (ej: a través de un sistema de autenticación) y filtrar los datos para evitar algunas de las vulnerabilidades comunes como Inyección SQL o NoSQL.
+
+En nuestro caso, esto es más delicado. Como la API es pública, cualquier usuario puede pedir realizar calquier operación que se le ocurra en nuestra base de datos.
+¿Cómo protegemos la información?
+Para resolver esto, y solo para las APIs públicas (osea para lo que son las APIs de backend esto no aplica), Firebase ofrece lo que llama las "reglas de seguridad" (security rules):
+
+https://firebase.google.com/docs/rules?hl=es-419
+https://firebase.google.com/docs/firestore/security/overview?hl=es-419
+https://firebase.google.com/docs/storage/security?hl=es-419
+
+
+## Cómo funcionan las reglas
+Si vemos las reglas que tenemos en Firestore actualmente, deberíamos ver algo así:
+    rules_version = '2';
+
+    service cloud.firestore {
+        match /databases/{database}/documents {
+            match /{document=**} {
+                allow read, write: if true;
+            }
+        }
+    }
+
+Las primeras 3 instrucciones son fijas:
+1- rules_version = '2';
+    Define que queremos usar la versión 2 de las reglas. Como es "opt-in", es necesario aclararlo.
+
+2- service cloud.firestore {
+    Define para qué servicio son estas reglas. Acá podemos ver que son las de Firestore. En Storage vamos a ver que en vez de firestore dice firestorage
+
+3- match /databases/{database}/documents {
+    Indica cuál es la ruta raíz del servicio. En firestore vemos que es la raíz de los docuemntos de la base de datos. En storage vamos a ver que es en la carpeta raíz del bucekt (bucket? no entendí muy bien qué quiso decir) donde guardamos los archivos
+
+Nuestro código va a estar, principalmente, dentro de este "match".
+Los "matches" son, precisamente, la forma en que definimos qué se puede y qué no se puede hacer.
+Llevan la siguiente sintaxis:
+
+    match <ruta> {
+        allow <acciones>: if <condición>;
+    }
+
+- <ruta>
+    Define la ruta del recurso (archivo o documento) al que queremos permitir alguna acción dadas las condiciones adecuadas.
+    En Storage, siempre apunta a la ruta de un archivo.
+    En Firestore, siempre debe apuntar a un documento (no puede apuntar a collections).
+    Tenemos la posibilidad de escribir rutas exactas a un documento o archivo. Por ejemplo:
+        match /users/idDelAdmin {...}
+    
+    Pero es algo muy poco común.
+    Casi siempre, lo que vamos a querer usar una variable para guardar los ids, definiendo un segmento dinámico.
+        match /users/{user} {...}
+    
+    Como podemos observar, los segmentos dinámicos se definen poniendo una variable entre llaves. El nombre es arbitrario, se puede poner el que quiera.
+    Como última alternativa, se les puede agregar a las variables el comodín "=**" (sin comillas). Este comodín significa "Este documento o cualquier documento de cualquier subcollection".
+
+- <acciones>
+    Es una lista, separada por coma, de las acciones que queremos permitir si se cumple la condición indicada.
+    Los posibles valores son:
+    - get: Permiso para leer un documento.
+    - list: Permiso para listar las subcollections del documento. (para la API púnlica el list no se suele usar)
+    - create: Permiso para crear el documento.
+    - update: Permiso para actualizar el documento.
+    - delete: Permiso para eliminar el documento.
+    - read: Combinación de "get, list".
+    - write: Combinación de "create, update, delete".
+
+- <condición>
+    Es la condición que debe cumplirse.
+    Tenemos acceso a operadores de comparación: ==, !=, <, >, <=, >=.
+    Tenemos acceso a operadores lógicos: && (and), || (or), ! (not).
+    Tenemos acceso a algunas variables:
+    - La variable "request".
+        Contiene información sobre la petición.
+        Entre sus propiedades, hay 2 especialmente importantes:
+        - request.auth
+            Si el usuario está autenticado en Firebase Authentication, contiene un objeto con los datos del usuario autenticado.
+            De lo contrario, es null.
+        - request.resource
+            Contiene los datos que se enviaron para grabar en el documento. Solo está disponible en acciones de "create" y "update".
+    - La variable "resource".
+        Contiene información sobre el documento con el que se está interactuando.
+        Está disponible en todas las acciones excepto "create". Cuando hacemos "create" como estamos creando un docuemnto, el docuemnto no existe y la variable resource es nula. 
+        No confundir "resource" con "request.resource". "resource" es una variable que informa sobre el docuemnto con el que estoy interactuando. "request.resource" es una propiedad de request es la información que se está pidiendo guardar en el docuemnto.
+    - Las variables que definimos en el "match".

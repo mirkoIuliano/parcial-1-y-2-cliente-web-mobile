@@ -6,7 +6,8 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useUser } from '../compossables/useUser';
 import { useLoggedUser } from '../compossables/useLoggedUser';
-import { savePrivateChatMessage } from '../services/private-chat';
+import { savePrivateChatMessage, subscribeToPrivateChatMessages } from '../services/private-chat';
+import { formatDate } from '../helpers/date';
 
 const route = useRoute()
 
@@ -25,6 +26,22 @@ const loadingMessages = ref ({})
 // Por último necesitamos los datos de un nuevo mensaje
 const newMessage = ref({
     text: ''
+})
+
+onMounted(async ()=> {
+    loadingMessages.value = true
+    // cuando se monte nos suscribimos a los cambios del chat privado
+    subscribeToPrivateChatMessages(
+        // el primer parametro es el id del usuario autetnticado
+        loggedUser.value.id,
+        // el segundo es el id del usuario con el que chateo
+        route.params.id,
+        // el tercero es el callback
+        newMessages => { 
+            messages.value = newMessages
+            loadingMessages.value = false
+        } 
+    )
 })
 
 async function handleSubmit() {
@@ -60,8 +77,9 @@ async function handleSubmit() {
                     v-for="message in messages"
                     class="p-4 rounded"
                     :class="{
-                        'bg-gray-200': loggedUser.id !== message.user_id,
-                        'bg-green-200 self-end': loggedUser.id === message.user_id,
+                        // dependiendo del id del usuario autenticado se pone uno u otro estilo
+                        'bg-gray-200': loggedUser.id !== message.user_id, // si el id del usuario autenticado es diferente al user_id del mensaje significa que el mensaje lo envió la otra persona
+                        'bg-green-200 self-end': loggedUser.id === message.user_id, // si son iguales siginifca que lo mandó el usuario autenticado
                         // 'bg-green-200': loggedUser.id === message.user_id,
                         // 'self-end': loggedUser.id === message.user_id,
                     }"
