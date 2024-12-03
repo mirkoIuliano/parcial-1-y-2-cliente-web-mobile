@@ -1,6 +1,3 @@
-<!-- 
-
--->
 <script setup>
 import { useRoute } from 'vue-router';
 import ProfileData from '../components/profile/ProfileData.vue';
@@ -10,6 +7,7 @@ import { useLoggedUser } from '../compossables/useLoggedUser';
 import { getPostsByUserId } from '../services/public-posts';
 import { onMounted, ref } from 'vue';
 import { getDisplayNameByUserId } from '../services/user-profile';
+import BaseHeading from '../components/BaseHeading.vue';
 
 const route = useRoute()
 
@@ -54,15 +52,21 @@ onMounted(() => {
 </script>
 
 <template>
-    <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Perfil de {{ user.displayName || user.email }}</h2>
-    <ProfileData :user="user"/>
-    <!-- link para ir a conversación privado con este usuario -->
-    <router-link 
-        :to="`/usuario/${user.id}/chat`"
-        class="mr-4 font-semibold text-blue-800 hover:text-blue-600 transition-colors duration-200"
-    > Conversación Privada con {{ user.displayName || user.email }}
-    </router-link>
+    <BaseHeading>Perfil de {{ user.displayName || user.email }}</BaseHeading>
+    <div class="flex flex-col mb-8 border-b-2 w-[80%] m-auto pb-8">
+        <ProfileData :user="user"/>
+        
+        <div class="m-auto mt-4">
+            <!-- link para ir a conversación privado con este usuario -->
+            <router-link 
+                :to="`/usuario/${user.id}/chat`"
+                class="mr-4 font-semibold text-blue-800 hover:text-blue-600 transition-colors duration-200"
+            > Conversación Privada con {{ user.displayName || user.email }}
+            </router-link>
+        </div>
+    </div>
 
+    <BaseHeading>Posteos</BaseHeading>
     <p class="text-center" v-if="loading">Cargando posteos...</p>
     <PostCard
         v-if="posts"

@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import { editMyProfilePhoto } from '../services/auth';
+import BaseHeading from '../components/BaseHeading.vue';
+
 
 
 const editData = ref({
@@ -70,7 +72,7 @@ async function handleFileSelection(ev) {
 </script>
 
 <template>
-    <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Editar mi foto de Perfil</h2>
+    <BaseHeading>Editar mi foto de Perfil</BaseHeading>
 
     <div class="flex gap-4 items-start">
         <form class="w-1/2"

@@ -5,6 +5,7 @@ import { getDisplayNameByUserId } from '../services/user-profile';
 import ProfileData from '../components/profile/ProfileData.vue';
 import PostCard from '../components/posts/PostCard.vue';
 import { useLoggedUser } from '../compossables/useLoggedUser';
+import BaseHeading from '../components/BaseHeading.vue';
 
 // creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 
 const { loggedUser } = useLoggedUser()
@@ -42,19 +43,24 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex items-end gap-4">
-        <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Mi Perfil</h2>
-        <router-link 
-            to="/mi-perfil/editar"
-            class="mb-4 text-blue-700 underline"
-        >Editar</router-link>
-        <router-link 
-            to="/mi-perfil/editar/foto"
-            class="mb-4 text-blue-700 underline"
-        >Editar foto</router-link>
-    </div>
-    <ProfileData :user="loggedUser"/>
+    <BaseHeading>Mi Perfil</BaseHeading>
+    <div class="flex flex-col mb-8 border-b-2 w-[80%] m-auto pb-8">
+        <div class="flex items-end gap-12 m-auto">
+            <router-link 
+                to="/mi-perfil/editar"
+                class=" mb-4 py-1 px-3 rounded-md font-medium bg-gray-100 hover:bg-gray-300 transition-colors "
+            > Editar perfil </router-link>
 
+            <router-link 
+                to="/mi-perfil/editar/foto"
+                class=" mb-4 py-1 px-3 rounded-md font-medium bg-gray-100 hover:bg-gray-300 transition-colors "
+            > Editar foto </router-link>
+        </div>
+
+        <ProfileData :user="loggedUser"/>
+    </div>
+
+    <BaseHeading class="mb-10">Mis posteos</BaseHeading>
     <PostCard 
         v-for="post in posts"
         :key="post.id" 

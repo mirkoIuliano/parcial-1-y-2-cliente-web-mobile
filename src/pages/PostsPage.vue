@@ -1,9 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue'
 import { subscribeToPublicPosts } from '../services/public-posts'
-import { getDisplayNameByUserId } from '../services/user-profile';
-import PostCard from '../components/posts/PostCard.vue';
-import { useLoggedUser } from '../compossables/useLoggedUser';
+import { getDisplayNameByUserId } from '../services/user-profile'
+import PostCard from '../components/posts/PostCard.vue'
+import { useLoggedUser } from '../compossables/useLoggedUser'
+import NoPostsYet from '/imgs/no-posts-yet.png'
+import BaseHeading from '../components/BaseHeading.vue'
 
 // creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser()
 const { loggedUser } = useLoggedUser()
@@ -26,9 +28,10 @@ const posts = ref(
     ]
 ) */
 
+const loading = ref(true)
+
 // Cuando se monte el componente leemos los posteos de Firestore
 onMounted( async () => {
-
     // llamamos a la función "subscribeToPublicPosts()" que sirve para recibir todos los posteos de la base de datos
     subscribeToPublicPosts( async (newPosts) => { // newPosts es una lista con todas las publicaciones
         
@@ -91,6 +94,7 @@ onMounted( async () => {
                 }
             })
         )
+        loading.value = false
     })
 }) 
 
@@ -98,23 +102,41 @@ onMounted( async () => {
 
 <template>
 
-    <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Posteos de la comunidad</h2>
+    <BaseHeading>Posteos de la comunidad</BaseHeading>
 
     <router-link 
         to="/publicaciones/crear-publicacion" 
         class="
             bg-white
-            text-slate-800 font-semibold text-xl hover:text-blue-600
-            border-2 rounded-lg border-slate-800 hover:border-blue-600
+            text-slate-800 font-semibold text-xl hover:text-cyan-700
+            border-2 rounded-lg border-cyan-950 hover:border-cyan-700
             block mr-16 w-max px-4 py-2 transition-colors duration-200
             fixed bottom-10 right-0
         "
-            
-    > 
-        Crear publicación
-    </router-link>
+    > Crear publicación </router-link>
 
     <section>
+
+        <p v-if="loading" class="text-2xl text-slate-700 text-center mt-14">Cargando posteos...</p>
+
+        <article class="min-h-[60%] flex items-center justify-center">
+    
+            <div v-if="posts.length === 0 && !loading" class="flex flex-col items-center gap-8 mb-8">
+                <p class="text-center text-slate-500 text-2xl">Todavía no existen posteos...</p>
+                <div>
+                    <img :src="NoPostsYet" alt="" class="w-60 h-60">
+                </div>
+                <div class="flex flex-col items-center gap-4">
+                    <p class="text-slate-700 font-bold text-2xl">¡Crea el primer posteo!</p>
+                    <router-link 
+                        to="/publicaciones/crear-publicacion" 
+                        class="px-6 py-3 bg-cyan-800 text-white rounded-lg text-lg font-semibold shadow-md hover:bg-cyan-700 transition-all duration-300"
+                    > Crear </router-link>
+                </div>
+            </div>
+        </article>
+
+
         <PostCard 
             v-for="post in posts"
             :key="post.id" 

@@ -7,7 +7,6 @@ import { formatDate } from '../../helpers/date';
 const props = defineProps({
     post: {
         type: Object,
-        required: true,
     },
     loggedUser: {
         type: Object,

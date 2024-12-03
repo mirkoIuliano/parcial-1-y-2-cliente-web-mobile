@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
 import { editMyProfile, subscribeToAuthChanges } from '../services/auth';
+import BaseHeading from '../components/BaseHeading.vue';
 
 // creamos "unsubscribeFromAuth" y la definimos como una función vacía (porque después vamos a igual "unsubscribeFromAuth" a una función)
 let unsubscribeFromAuth = () => {}
@@ -45,7 +46,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Editar Mi Perfil</h2>
+    <BaseHeading>Editar Mi Perfil</BaseHeading>
 
     <form 
         action="#"

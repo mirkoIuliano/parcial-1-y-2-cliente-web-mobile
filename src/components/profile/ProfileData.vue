@@ -15,27 +15,26 @@ defineProps({
 </script>
 
 <template>
-    <div class="flex gap-4 items-start">
-        <div class="w-1/6 bg-slate-400">
+    <div class="m-auto">
+        <div>
             <img 
                 :src="user.photoURL || NoPhoto" 
                 alt=""
+                class="w-64 h-64"
             >
             <!-- En vez de usar como componente (NoPhoto) podemos llamar a la foto directamente así:
             <img 
                 :src="user.photoURL || '/imgs/no-photo.png'" 
-                alt=""
             >
             -->
         </div>
         <div>
-            <div class="mb-4">{{ user.bio || "Acá va mi biografía..." }}</div>
-            <dl>
-                <dt class="font-bold">Email</dt>
-                <dd class="mb-3">{{ user.email }}</dd>
-                <dt class="font-bold">Nombre de Usuario</dt>
-                <dd class="mb-3">{{ user.displayName || "No especificado..." }}</dd>
-            </dl>
+            <p class="font-bold mb-1 text-xl">{{ user.displayName || "" }}</p>
+            <p class="mb-1">{{ user.bio || "Todavía no tiene biografía..." }}</p>
+            <p class="mb-1">{{ user.email }}</p>
         </div>
+    </div>
+
+    <div class="flex gap-4 items-start">
     </div>
 </template>

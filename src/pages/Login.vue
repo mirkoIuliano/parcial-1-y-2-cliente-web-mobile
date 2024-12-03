@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { login } from '../services/auth';
 import { useRouter } from 'vue-router'
+import BaseHeading from '../components/BaseHeading.vue'
 
 const router = useRouter()
 
@@ -30,7 +31,7 @@ async function handleSubmit(){
 
 <template>
 
-    <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Iniciar Sesión</h2>
+    <BaseHeading>Iniciar Sesión</BaseHeading>
     
     <form 
         action="#"

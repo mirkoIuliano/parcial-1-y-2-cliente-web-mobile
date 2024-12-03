@@ -2,12 +2,13 @@
 A este archivo se entra cliqueando en chat privado y en la url se enceuntra el :id del user del cual es el chat
 -->
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useUser } from '../compossables/useUser';
 import { useLoggedUser } from '../compossables/useLoggedUser';
 import { savePrivateChatMessage, subscribeToPrivateChatMessages } from '../services/private-chat';
 import { formatDate } from '../helpers/date';
+import BaseHeading from '../components/BaseHeading.vue';
 
 const route = useRoute()
 
@@ -66,7 +67,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-    <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Chat Privado con {{user.displayName || user.email}}</h2>
+    <BaseHeading>Chat Privado con {{user.displayName || user.email}}</BaseHeading>
 
     <section class="mb-4">
         <h2 class="sr-only">Mensajes</h2>

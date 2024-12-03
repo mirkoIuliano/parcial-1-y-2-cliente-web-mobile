@@ -1,28 +1,10 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import {savePulicPost, subscribeToPublicPosts} from '../services/public-posts'
+import { ref } from 'vue'
+import {savePulicPost} from '../services/public-posts'
 import {useRouter} from 'vue-router'
+import BaseHeading from '../components/BaseHeading.vue'
 
 const router = useRouter()
-
-// dentro de esta variable vamos a guardar todos los registros (osea todos los posteos) de la base de datos
-const posts = ref([])
-/* Ejemplo de cómo quedarían los datos dentro
-const posts = ref(
-    [
-        {
-            book_title: 'libro numero 1',
-            review: 'este libro es muy bueno',
-            user_name: 'kirmoderico'
-        },
-        {
-            book_title: 'libro numero 2',
-            review: 'este libro es muy malo',
-            user_name: 'iulianomirko'
-        },
-    ]
-)
-*/
 
 // esta variable va a capturar los datos de los inputs
 const newPost = ref({
@@ -30,7 +12,38 @@ const newPost = ref({
     review: '',
 })
 
+// el mensaje de error va a estar en la siguiente variable
+const errorMessage = ref('');
+
 function handleSubmit(){
+
+    /*---------- Validaciones ----------*/
+    if (newPost.value.book_title.length == 0) {
+        return errorMessage.value = "Es obligatorio poner un título al posteo"
+    }
+
+    if (newPost.value.book_title.length < 5) {
+        return errorMessage.value = "El título debe tener por lo menos 5 caracteres"
+    }
+
+    if (newPost.value.book_title.length > 100) {
+        return errorMessage.value = "El título puede tener como máximo 100 caracteres"
+    }
+
+    if (newPost.value.review.length == 0) {
+        return errorMessage.value = "Es obligatorio escribir una reseña para el posteo"
+    }
+
+    if (newPost.value.review.length < 200) {
+        return errorMessage.value = "La reseña debe tener por lo menos 200 caracteres"
+    }
+    
+    if (newPost.value.review.length > 2000) {
+        return errorMessage.value = "La reseña puede tener como máximo 2000 caracteres"
+    }
+
+    /*---------- Fin de validaciones ----------*/
+
     console.log("Se envió el formulario de posteo nuevo")
 
     // llamamos a la función "savePulicPost()" de nuestro archivo [public-post.js] para guardar la publicación en la Firestore
@@ -49,7 +62,7 @@ function handleSubmit(){
 </script>
 
 <template>
-    <h2 class="text-3xl text-center text-slate-800 font-bold my-6">Nuevo Posteo</h2>
+    <BaseHeading>Nuevo Posteo</BaseHeading>
     <form 
     action="#" 
     @submit.prevent="handleSubmit"
@@ -75,6 +88,11 @@ function handleSubmit(){
                 placeholder="Comparte tu opinión sobre el libro..."
                 v-model="newPost.review"
             ></textarea>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div v-if="errorMessage" class="text-red-500 mb-4">
+            {{ errorMessage }}
         </div>
 
         <button class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 transition-colors duration-200">Postear</button>

@@ -1,6 +1,6 @@
 import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
 import { db } from "./firebase" // importamos la variable db que creamos en firebase. Esta es la referencia a la base y la necesitamos para poder escribir o leer datos de la base 
-import { arrayUnion, arrayRemove, updateDoc } from "firebase/firestore"
+import { arrayUnion, updateDoc } from "firebase/firestore"
 import { auth } from "./firebase"
 import { getDisplayNameByUserId } from "./user-profile"
 
