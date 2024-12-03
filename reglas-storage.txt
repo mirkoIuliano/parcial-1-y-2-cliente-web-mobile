@@ -1,0 +1,14 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read: if request.auth != null // esto permite leer clqr archivo
+    }
+    
+    match /users/{user}/{file} {
+    	allow create, update: if 
+      	request.auth != null &&
+        request.auth.uid == user; // con esto verificamos que el usuario esté modificando la carpeta que le corresponde
+    }
+  }
+}
