@@ -5,7 +5,7 @@ import { getDisplayNameByUserId } from '../services/user-profile';
 import PostCard from '../components/posts/PostCard.vue';
 import { useLoggedUser } from '../compossables/useLoggedUser';
 
-// creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 
+// creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser()
 const { loggedUser } = useLoggedUser()
 
 // dentro de esta variable vamos a guardar todos los registros (osea todos los posteos) de la base de datos

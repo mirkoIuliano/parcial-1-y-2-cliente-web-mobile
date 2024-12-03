@@ -33,7 +33,7 @@ async function handleSubmit(){
 
 <template>
 
-    <h2>Crear Cuenta</h2>
+    <h2 class="text-5xl">Crear Cuenta</h2>
     
     <form 
         action="#"
