@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore";
 import { db } from "./firebase";
 
 /*
@@ -90,19 +90,10 @@ function getCacheKey (senderId, receiverId) {
 /**
  * 
  * @param {string} key 
- * @param {*} document 
+ * @param {*} docuement 
  */
-function putInCache(key, document) {
-    if (!document || !document.id) {
-        console.warn("Intentando guardar un documento inválido en el caché:", document);
-        return;
-    }
-    console.log("Guardando en el caché:", key, document);
-    privateChatCache[key] = document;
-    /*  
-    ASI LO HIZO EL PROFESOR PERO LO CAMBIÉ PORQUE NO ME ANDABA 
-    privateChatCache[key] = document
-    */
+function putInCache(key, docuement) {
+    privateChatCache[key] = docuement
 }
 
 /**
@@ -111,7 +102,6 @@ function putInCache(key, document) {
  * @returns {string|null}
  */
 function retrieveFromCache(key) {
-    console.log("Recuperando del caché:", key, privateChatCache[key]);
     return privateChatCache[key] || null // retorna esa clave o null, en el caso de que no exista
 }
 /*
@@ -137,45 +127,42 @@ async function getPrivateChatDocument(senderId, receiverId) {
 
     // si tengo el docuemnto en el caché retornamos el cacheDoc que se encentrá allí
     if (cacheDoc){
-        // console.log("Recuperando el documento del chat privado")
+        console.log("Recuperando el documento del chat privado del caché")
         return cacheDoc
     }
-
     console.log("Buscando el documento del chat privado en Firestore")
+    
+
     const chatCollectionRef = collection(db, 'private-chats')
     
-    const chatQuery = query(
-        chatCollectionRef,
-        // la función where recibe tres paráemtros: el primero es el nombre de la propiedad del docuemtno que quiereo buscar, el segundo es el operador y el tercero el valor  
-        where(`users.${senderId}`, '==', true),
-        where(`users.${receiverId}`, '==', true),
-        limit(1) // lo limitamos para que solo traiga el Primer registro de la base de datos
-        // como se que solo puede haber un docuemento entre estos usuarios, el limit se asegura de que una vez que encuentre ese documento deje de buscar (esto es importante porque si tenemos 10 millones de docuemtnos, si lo encuentra no va a tener que buscar en los que le faltan)
-    )
+    const chatQuery = query(chatCollectionRef, where( // la función where recibe tres paráemtros: el primero es el nombre de la propiedad del docuemtno que quiereo buscar, el segundo es el operador y el tercero el valor 
+        'users', '==', {
+            [senderId] : true,
+            [receiverId] : true,
+        }
+    ), limit(1)) // lo limitamos para que solo traiga el Primer registro de la base de datos
+    // como se que solo puede haber un docuemento entre estos usuarios, el limit se asegura de que una vez que encuentre ese documento deje de buscar (esto es importante porque si tenemos 10 millones de docuemtnos, si lo encuentra no va a tener que buscar en los que le faltan)
 
     const chatSnapshot = await getDocs(chatQuery) // usamos getDocs en vez de getDoc porque, si bien sabemos que en este caso solo puede haber un docuemetno, getDoc solo sirve cuando yo sé el id exacto
     
-    let chatDocRef
+    let chatDoc
     
     if(chatSnapshot.empty) // si el snapshot está vacío creamos un docuemtno porque no encontramos un document que tenga los mismos senderId y receiverId. Como no encontró significa que es un chat privado nuevo y que se tiene que crear un nuevo documento
     {
-        console.log("No se encontró el chat, creando uno nuevo")
-
-        chatDocRef = await addDoc(chatCollectionRef, {
+        chatDoc = await addDoc(chatCollectionRef, {
             users: {
                 [senderId] : true,
                 [receiverId] : true,
             }
         })
     } else {
-        chatDocRef = chatSnapshot.docs[0].ref  // Convertimos el snapshot al `DocumentReference`
+        chatDoc = chatSnapshot.docs[0] // chatDoc va a ser el primero que se haya encontrado
     }
 
-    // Antes de retornar el chatDocRef, si lo tuvimos que buscar al docuemtno porque no lo teníamos en el caché, guardamos el docuemnto en el caché
-    console.log("Guardando en el caché el documento:", chatDocRef);
-    putInCache(cacheKey, chatDocRef) 
+    // Antes de retornar eñ chatDoc, si lo tuvimos que buscar al docuemtno porque no lo teníamos en el caché, guardamos el docuemnto en el caché
+    putInCache(cacheKey, chatDoc) 
 
-    return chatDocRef
+    return chatDoc
 }
 
 /**
@@ -188,16 +175,13 @@ export async function savePrivateChatMessage(senderId, receiverId, text) // para
 {
     // Como necesito el docuemnto de la conversación para poder anidar la subcollection dentro, lo primero que vamos a hacer es crear/encontrar el Docuement de la conversación privada entre los dos
     // Primero buscamos y vemos si ya existe
-    const chatDocRef = await getPrivateChatDocument(senderId, receiverId)
+    const chatDoc = await getPrivateChatDocument(senderId, receiverId)
 
-    // Ahora que tenemos el docuemnto (en chatDocRef), y especialmente su id, podemos grabar el mensaje en la subcollection de messages del documento
-    const messagesSubcollectionRef = collection(chatDocRef, 'messages') // Usamos directamente el DocumentReference.
-
-    /* ESTO ES LO QUE HABIA HECHO EL PROFE, PERO YO LO CAMBIE PORQUE ME DABA ERROR */
-    // const messagesSubcollectionRef = collection(db, `private-chats/${chatDocRef.id}/messages`) // Para referenciar una subcollection el trabajo es casi lo mismo que con una collection normal. La gran diferencia es que el path va a tener 3 o más valores 
+    // Ahora que tenemos el docuemnto (en chatDoc), y especialmente su id, podemos grabar el mensaje en la subcollection de messages del documento
+    const messagesSubcollectionRef = collection(db, `private-chats/${chatDoc.id}/messages`) // Para referenciar una subcollection el trabajo es casi lo mismo que con una collection normal. La gran diferencia es que el path va a tener 3 o más valores 
     // La cantidad de segmentos que tiene que tener la url tiene que ser impar si hace referencia a una collection y cantidades pares para apuntar docuemntos
-    // Es por eso que nosotros usamos 3 `private-chats/${chatDocRef.id}/messages` => messages sería la subcollection
-    // Le esatmos diciendo que queremos crear en la colección private-chats, dentro del docuemtno que se acaba de crear (chatDocRef), la subcolección de mensajes
+    // Es por eso que nosotros usamos 3 `private-chats/${chatDoc.id}/messages` => messages sería la subcollection
+    // Le esatmos diciendo que queremos crear en la colección private-chats, dentro del docuemtno que se acaba de crear (chatDoc), la subcolección de mensajes
 
     // para pushear el mensaje adentro hacemos addDoc
     await addDoc(messagesSubcollectionRef, // como primer parámetro le pasamos la referencia a la subcollection 'messages' donde van a estar los mensajes de la conversación
