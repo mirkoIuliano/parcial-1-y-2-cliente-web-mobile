@@ -27,9 +27,9 @@ onMounted( async () => {
                 // creo comments y lo inicializo como un array vacío
                 post.comments = []
 
-                // creo commentsModel, que va a servir para que el input de comentarios se independiente para cada publicación 
+                // creo commentsModel, que va a servir para que el input de comentarios sea independiente para cada publicación 
                 post.commentsModel = {
-                    user_comment: "", // Campo para capturar el comentario del usuario
+                    user_comment: "" // campo para capturar el comentario del usuario
                 }
 
                 // creo una promesa 'loadComments' para esperar a que los comentarios se cargue durante la suscripción
@@ -45,9 +45,6 @@ onMounted( async () => {
                         */
                     })
                 })
-
-                
-
                 await loadComments
                 return post
             })

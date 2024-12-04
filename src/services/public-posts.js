@@ -1,6 +1,5 @@
-import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
+import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
 import { db } from "./firebase" // importamos la variable db que creamos en firebase. Esta es la referencia a la base y la necesitamos para poder escribir o leer datos de la base 
-import { arrayUnion } from "firebase/firestore"
 import { auth } from "./firebase"
 import { getDisplayNameByUserId } from "./user-profile"
 
@@ -152,7 +151,7 @@ export async function getPostsByUserId(userId, callback) {
 
     if(userId){ // si hay un user autenticado:
         // console.log("hay un usuario autenticado")
-        // creo una query (consulta) para traer todos los documentos del usuario ordenados de manera descendente
+        // creo una query (consulta) para traer todos los documentos (osea todas las publicaciones) del usuario ordenados de manera descendente
         userPostsQuery = query(
             publicPostsCollectionRef, // le paso la referencia a la collection de donde quiero que traiga los documents
             orderBy('created_at', 'desc'), // ordenamos por fecha de creación, de manera descendente
@@ -176,8 +175,9 @@ export async function getPostsByUserId(userId, callback) {
                     user_name: displayName, // usamos displayName, que es el nombre dinámico
                     book_title: doc.data().book_title || "",
                     review: doc.data().review || "",
-                    comments: doc.data().comments || [], // si falta, devuelve un array vacío
-                    created_at: doc.data().created_at?.toDate(), // si falta, devuelve un array vacío
+                    created_at: doc.data().created_at?.toDate(), 
+                    comments: [], // inicializamos como un array vacío para después 'llenarlo' con los datos de subscribeToComments()
+                    commentsModel: { user_comment: "" }, // commentsModel lo creo para el input de comentarios nuevos
                 }
             })
         ) 

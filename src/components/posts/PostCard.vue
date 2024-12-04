@@ -22,7 +22,7 @@ async function handleComment (postId, user_comment )
 {
     // Establecemos el estado de carga solo para este post. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
     if(loading.value) return // evita múltiples clics mientras se envía
-    if (!user_comment.trim()) return // esto hace que no se permitan comentarios vacíos
+    // if (!user_comment.trim()) return // esto hace que no se permitan comentarios vacíos
 
     console.log("mandando comentario...")
 
@@ -77,11 +77,11 @@ async function handleComment (postId, user_comment )
             <h4 class="font-semibold text-base text-slate-800">Comentarios:</h4>
             <ul>
                 <p v-if="post.comments.length == 0" class="text-slate-600 text-sm mt-2">No existen comentarios en la publicación todavía...</p>
-                <li v-for="comment in post.comments || []" class="text-slate-600 text-sm mt-2">
+                <li v-for="comment in post.comments || []" :key="comment.id" class="text-slate-600 text-sm mt-2">
                     <router-link
                         :to="`/usuario/${comment.comment_user_id}`"
                     >
-                        <strong>@{{ comment.user_name }}:</strong> 
+                        <strong>@{{ comment.user_name }}:</strong>
                     </router-link>
                     {{ comment.user_comment }}
                 </li>

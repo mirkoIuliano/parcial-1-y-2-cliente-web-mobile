@@ -4,7 +4,7 @@ import ProfileData from '../components/profile/ProfileData.vue';
 import { useUser } from '../compossables/useUser';
 import PostCard from '../components/posts/PostCard.vue';
 import { useLoggedUser } from '../compossables/useLoggedUser';
-import { getPostsByUserId } from '../services/public-posts';
+import { getPostsByUserId, subscribeToComments } from '../services/public-posts';
 import { onMounted, ref } from 'vue';
 import { getDisplayNameByUserId } from '../services/user-profile';
 import BaseHeading from '../components/BaseHeading.vue';
@@ -21,7 +21,7 @@ const { user, loading } = useUser(route.params.id) // con useUser conseguimos lo
 
 onMounted(() => {
 
-    // si entramos al perfil del usuario autenticado lo reenviamos a su perfil. No tiene sentido que el propio usuario pueda entrar al UserProfile de él mismo
+    // si entramos al perfil del usuario autenticado lo reenviamos a su perfil (/mi-perfil). No tiene sentido que el propio usuario pueda entrar al UserProfile de él mismo
     if (route.params.id == loggedUser.value.id) {
         router.push('/mi-perfil')
         return console.log("son la misma perosna")
@@ -31,28 +31,38 @@ onMounted(() => {
 
     // a la función getPostsByUserId tenemos que pasarle el id del usuario y una función callback
     getPostsByUserId(route.params.id, async (userPosts) => { // userPosts es el resultado de getPostsByUserId()
+
         // al array posts le vamos a agregar lo siguiente
         posts.value = await Promise.all(
+
             userPosts.map(async (userPost) => { // hacemos un map de userPosts y ahora 'userPost' va a representar a cada uno de los docuemntos del usuario
-                const resolvedComments  = await Promise.all( // en resolvedComments se va a guardar todos los comentarios del posteo, pero con el user_name puesto dinámicamente
-                    userPost.comments.map(async (comment) => { // como comments es un array tenemos que hacer un map de comments
-                        const displayName = await getDisplayNameByUserId(comment.comment_user_id) // a getDisplayNameByUserId() le enviamos el id del user que comentó para traer el user_name dinámicamente
-                        return { // retorna un objeto
-                            ...comment, // con todo el contenido que tenía comment (osea el comment_user_id y el user_comment)
-                            user_name: displayName, // y le agregamos user_name, que va a ser el displayName traído dinámicamente
-                        }
-                    })
-                )
-                // una vez terminado el userPost.comments.map(), hacemos el return de userPosts.map()
-                return { // retornamos un objeto con:
-                    ...userPost, // todo lo que ya tenía el documento del posteo
-                    comments: resolvedComments, // comments lo igualamos a resolvedComments, que son los mismos comments, pero con user_name
-                    commentsModel: { // y le agregamos un objeto commentsModel, que va a servir para la caja de comentarios nuevos
-                        user_comment: ""
-                    }
+
+                // creo comments y lo inicializo como un array vacío
+                userPost.comments = []
+
+                // creo commentsModel, que va a servir para que el input de comentarios sea independiente para cada publicación 
+                userPost.commentsModel = { 
+                    user_comment: "" // campo para capturar el comentario del usuario
                 }
+
+                // creo una promesa 'loadComments' para esperar a que los comentarios se cargue durante la suscripción
+                const loadComments = new Promise((resolve) => {
+                    // usamos subscribeToComments() para suscribirnos a la subcolección comments, osea a los comentarios de este post. A esta función le tenemos que pasar el id del post y un callback
+                    subscribeToComments(userPost.id, (newComments) => {
+                        userPost.comments = [...newComments] // agregamos el contenido de newComments en userPost.comments
+                        resolve()
+                        /* 
+                        resolve() es una función de las promesas de JS y sirve para completar la promesa. Indicia que la función asincrónica terminó
+                        en mi codigo la uso para asegurarme de que se carguen los comentarios
+                        sin esto cuando carga el DOM no aparece ningún comentario hasta que haga un cambio en el input
+                        */
+                    })
+                })
+                await loadComments
+                return userPost
             })
         )
+        loading.value = false
     })}
 ) 
 
