@@ -60,11 +60,17 @@ async function handleComment (postId, user_comment )
                 <p class="text-sm font-semibold text-slate-400 p-0 m-0">{{ formatDate(post.created_at) || 'Recién creado' }}</p>
             </div>
             <router-link 
+                v-if="post.user_id === loggedUser.id" 
+                class=" ml-auto mr-4 py-1 px-3 rounded-md font-medium bg-gray-100 hover:bg-gray-300 transition-colors"
+                :to="`/publicaciones/editar/${post.id}`"
+            >Editar</router-link>
+
+            <div class="flex flex-col">
+                <router-link 
                 :to="`/usuario/${post.user_id}`"
                 class="mr-4 font-semibold text-blue-800 hover:text-blue-600 transition-colors duration-200"
-            >
-                <p class="mr-4">@{{ post.user_name }}</p>
-            </router-link>
+                > @{{ post.user_name }} </router-link>
+            </div>
         </div>
 
         <div class="whitespace-pre-wrap break-words font-sans text-base mb-5 p-5 border-b-2">

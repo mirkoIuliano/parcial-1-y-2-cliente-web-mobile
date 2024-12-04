@@ -24,7 +24,7 @@ export async function updateUserProfile(uid, data) { // data sería un objeto co
         // el proceso sería: primero tenemos acceso a la base de datos con 'db' y después entramos a la collection users ('/users') y entramos al doc específico ('/${uid}')
     )
 
-    // Editamos el documento usando la función updateDoc()
+    // Editamos/actualizamos el documento usando la función updateDoc()
     await updateDoc(profileDocumentRef, // como primer parámetro le pasamos la referencia al documento específico
         { // como segundo parámetro le pasamos los datos 
             ...data

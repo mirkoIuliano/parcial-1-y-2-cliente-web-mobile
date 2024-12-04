@@ -31,8 +31,8 @@ onMounted(async () => {
     // traemos todos los posteos del usuario con getPostsByUserId
     posts.value = await getPostsByUserId(route.params.id) // guardamos en el el array posts[] todas las publicaciones del usuario
 
-    if (posts.value == false) {
-        return console.error("no tiene")
+    if (posts.value == null) {
+        return console.log("no tiene posteos")
     }
 
     // recorremos el array posts con un forEach
@@ -71,7 +71,7 @@ onMounted(async () => {
 
     <p v-if="loading" class="text-2xl text-slate-700 text-center mt-14">Cargando posteos...</p>
 
-    <article v-if="posts === false && !loading"  class="flex items-center justify-center mb-12">
+    <article v-if="posts === null && !loading"  class="flex items-center justify-center mb-12">
         <div class="flex flex-col items-center gap-8 mb-8">
             <p class="text-center text-slate-500 text-2xl">Todavía no existen posteos...</p>
             <div>

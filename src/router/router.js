@@ -1,16 +1,17 @@
 // Archivo de creación y configuración del Router
-import { createRouter, createWebHashHistory } from "vue-router";
-import Home from '../pages/Home.vue';
-import PostsPage from '../pages/PostsPage.vue';
-import CreatePostForm from '../pages/CreatePostForm.vue';
-import Login from '../pages/Login.vue';
-import Register from '../pages/Register.vue';
-import MyProfile from "../pages/MyProfile.vue";
-import MyProfileEdit from "../pages/MyProfileEdit.vue";
-import MyProfileEditPhoto from "../pages/MyProfileEditPhoto.vue";
-import UserProfile from "../pages/UserProfile.vue";
-import PrivateChat from "../pages/PrivateChat.vue";
-import { subscribeToAuthChanges } from "../services/auth";
+import { createRouter, createWebHashHistory } from "vue-router"
+import Home from '../pages/Home.vue'
+import PostsPage from '../pages/PostsPage.vue'
+import CreatePostForm from '../pages/CreatePostForm.vue'
+import Login from '../pages/Login.vue'
+import Register from '../pages/Register.vue'
+import MyProfile from "../pages/MyProfile.vue"
+import MyProfileEdit from "../pages/MyProfileEdit.vue"
+import MyProfileEditPhoto from "../pages/MyProfileEditPhoto.vue"
+import UserProfile from "../pages/UserProfile.vue"
+import PrivateChat from "../pages/PrivateChat.vue"
+import EditPost from "../pages/EditPost.vue"
+import { subscribeToAuthChanges } from "../services/auth"
 // importamos subscribeToAuthChanges para poder saber si el usuario está o no autenticado (esto lo sabemos con subscribeToAuthChanges y sus observers)
 // import { subscribeToAuthChanges } from "../services/auth";
 
@@ -24,6 +25,14 @@ const routes = [
     {
         path:'/publicaciones', 
         component: PostsPage,
+        // agregamos un campo 'meta' a las rutas que requieren autenticación
+        meta: { // los campos meta son campos que le podemos agregar a cualquier ruta, para asignarles el valor que querramos
+            requireAuth: true // el usuario va a necesitar estar autenticado para acceder a esta ruta
+        }
+    },
+    {
+        path:'/publicaciones/editar/:id', 
+        component: EditPost,
         // agregamos un campo 'meta' a las rutas que requieren autenticación
         meta: { // los campos meta son campos que le podemos agregar a cualquier ruta, para asignarles el valor que querramos
             requireAuth: true // el usuario va a necesitar estar autenticado para acceder a esta ruta
@@ -122,4 +131,4 @@ router.beforeEach( // vamos a usar la función beforeEach(), que se ejecuta ante
 
 
 // exportamos el router
-export default router;
+export default router

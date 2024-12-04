@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore"
 import { db } from "./firebase" // importamos la variable db que creamos en firebase. Esta es la referencia a la base y la necesitamos para poder escribir o leer datos de la base 
 import { auth } from "./firebase"
 import { getDisplayNameByUserId } from "./user-profile"
@@ -43,13 +43,13 @@ export async function savePulicPost({book_title, review})
 
 // Función para obtener los posteos de la base de datos
 export async function getPublicPosts() {
-    const publicPostsCollectionRef = collection(db, "public-posts");
-    const postsQuery = query(publicPostsCollectionRef, orderBy("created_at", "desc"));
+    const publicPostsCollectionRef = collection(db, "public-posts")
+    const postsQuery = query(publicPostsCollectionRef, orderBy("created_at", "desc"))
 
-    const snapshot = await getDocs(postsQuery);
+    const snapshot = await getDocs(postsQuery)
     const posts = await Promise.all(
         snapshot.docs.map(async (doc) => {
-            const displayName = await getDisplayNameByUserId(doc.data().user_id);
+            const displayName = await getDisplayNameByUserId(doc.data().user_id)
             return {
                 id: doc.id,
                 user_id: doc.data().user_id,
@@ -59,11 +59,11 @@ export async function getPublicPosts() {
                 created_at: doc.data().created_at?.toDate(),
                 comments: [], // se inicializa vacío y después se "rellena" con subscribeToComments()
                 commentsModel: { user_comment: "" },
-            };
+            }
         })
-    );
+    )
 
-    return posts;
+    return posts
 }
 
 // Función para suscribirnos a los comentarios y escuchar los cambios de los comentarios en una publicaición específica
@@ -98,7 +98,7 @@ export async function addCommentToPost(postId, comment) // como parámetros reci
 {
     console.log("[public-posts.js addCommentToPost] Se ejecutó la función")
     // commentsCollectionRef  va a tener la referencia a la subcolección comments de la publicación específica
-    const commentsCollectionRef  = collection(db, 'public-posts', postId, 'comments'); // usamos collection para poder buscar en la subcollection 'comments', en la collection 'public.posts', del documento específico al cual se le está agregando un comentario
+    const commentsCollectionRef  = collection(db, 'public-posts', postId, 'comments') // usamos collection para poder buscar en la subcollection 'comments', en la collection 'public.posts', del documento específico al cual se le está agregando un comentario
 
     // usamos addDoc para agregar documento 
     await addDoc(commentsCollectionRef , // como primer parámetro le pasamos la referencia a la subcollection
@@ -135,7 +135,7 @@ export async function getPostsByUserId(userId) {
     
     if (postsSnapshot.docs.length == 0) {
         // console.log("no tiene posteos posteos este usuario")
-        return false
+        return null
     }
 
     const posts = await Promise.all(
@@ -156,4 +156,44 @@ export async function getPostsByUserId(userId) {
 
     return posts
 
+}
+
+// Función para traer un docuemnto específico
+export async function getPostById(postId) {
+    // Creamos la referencia al documento específico en la colección 'public-posts'
+    const postDocRef = doc(db, "public-posts", postId)
+
+    const post = await getDoc(postDocRef) // con getDoc le pasamos le referencia al post y lo guardamos en post
+
+    if (!post.exists()) {
+        console.error(`[public-posts.js getPostById] No se encontró el posteo con ID: ${postId}`)
+        return null
+    }
+
+    // obtenemos el displayName dinámicamente con la función getDisplayNameByUserId, a la cual se le tiene que pasar el id del user como parámetro
+    const displayName = await getDisplayNameByUserId(post.data().user_id)
+
+    // retornamos un objeto con todos los datos necesario del posteo
+    return {
+        id: post.id,
+        user_id: post.data().user_id,
+        user_name: displayName || "",
+        book_title: post.data().book_title || "",
+        review: post.data().review || "",
+        created_at: post.data().created_at?.toDate(),
+        // no retorno nada sobre los comentarios ya que no veo necesario que tenga sección de comentarios en un edit del posteo (quizá en un futuro estaría bueno ampliar esto para que pueda eliminar comentarios de otros usuarios??)
+    }
+}
+
+// Función para editar un docuemtno
+export async function editMyPost(postId, updatedData) {
+    // Creamos la referencia al documento específico en la colección 'public-posts'
+    const postDocRef = doc(db, "public-posts", postId)
+
+    // Editamos/actualizamos el documento usando la función updateDoc()
+    await updateDoc(postDocRef, // como primer parámetro le pasamos la referencia al documento específico
+    { // como segundo parámetro le pasamos un objeto con los datos a actualizar 
+        book_title: updatedData.book_title,
+        review: updatedData.review,
+    })
 }
