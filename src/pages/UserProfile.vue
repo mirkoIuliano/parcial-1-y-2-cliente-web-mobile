@@ -31,6 +31,10 @@ onMounted(async () => {
     // traemos todos los posteos del usuario con getPostsByUserId
     posts.value = await getPostsByUserId(route.params.id) // guardamos en el el array posts[] todas las publicaciones del usuario
 
+    if (posts.value == false) {
+        return console.error("no tiene")
+    }
+
     // recorremos el array posts con un forEach
     posts.value.forEach((post) => {  
         // en cada post nos suscribimos a los comentarios para poder ver los cometnarios nuevos cuando se actualizan  
@@ -67,8 +71,8 @@ onMounted(async () => {
 
     <p v-if="loading" class="text-2xl text-slate-700 text-center mt-14">Cargando posteos...</p>
 
-    <article class="flex items-center justify-center mb-12">
-        <div v-if="posts.length === 0 && !loading" class="flex flex-col items-center gap-8 mb-8">
+    <article v-if="posts === false && !loading"  class="flex items-center justify-center mb-12">
+        <div class="flex flex-col items-center gap-8 mb-8">
             <p class="text-center text-slate-500 text-2xl">Todavía no existen posteos...</p>
             <div>
                 <img :src="NoPostsYet" class="w-60 h-60">

@@ -132,6 +132,12 @@ export async function getPostsByUserId(userId) {
     }
 
     const postsSnapshot = await getDocs(userPostsQuery)
+    
+    if (postsSnapshot.docs.length == 0) {
+        // console.log("no tiene posteos posteos este usuario")
+        return false
+    }
+
     const posts = await Promise.all(
         postsSnapshot.docs.map(async (doc) => {
             const displayName = await getDisplayNameByUserId(doc.data().user_id)

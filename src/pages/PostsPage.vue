@@ -1,7 +1,3 @@
-<!-- 
-ACA ESTOY INTENTANDO TRAER POSTEOS CON GETDOCS 
-CTRL + Z HASTA ACA SI ES QUE NO FUNCIONA
--->
 <script setup>
 import { onMounted, ref } from 'vue'
 import { getPublicPosts, subscribeToComments } from '../services/public-posts'
