@@ -1,6 +1,10 @@
+<!-- 
+ACA ESTOY INTENTANDO TRAER POSTEOS CON GETDOCS 
+CTRL + Z HASTA ACA SI ES QUE NO FUNCIONA
+-->
 <script setup>
 import { onMounted, ref } from 'vue'
-import { subscribeToComments, subscribeToPublicPosts } from '../services/public-posts'
+import { getPublicPosts, subscribeToComments } from '../services/public-posts'
 import PostCard from '../components/posts/PostCard.vue'
 import { useLoggedUser } from '../compossables/useLoggedUser'
 import NoPostsYet from '/imgs/no-posts-yet.png'
@@ -16,40 +20,19 @@ const loading = ref(true)
 
 // Cuando se monte el componente leemos los posteos de Firestore
 onMounted( async () => {
-    // llamamos a la función "subscribeToPublicPosts()" que sirve para recibir todos los posteos de la base de datos
-    subscribeToPublicPosts( async (newPosts) => { // newPosts es una lista con todas las publicaciones
-        
-        // al array 'posts' le vamos a agregar lo siguiente:
-        posts.value = await Promise.all( 
-            
-            newPosts.map(async (post) => { // hacemos un .map() de la lista de publicaciones que nos llega por subscribeToPublicPosts()
+    // cuando monte el componente traemos todos los posteos con getPublicPosts() y los guardamos en el array posts
+    posts.value = await getPublicPosts()
+    loading.value = false
 
-                // creo comments y lo inicializo como un array vacío
-                post.comments = []
-
-                // creo commentsModel, que va a servir para que el input de comentarios sea independiente para cada publicación 
-                post.commentsModel = {
-                    user_comment: "" // campo para capturar el comentario del usuario
-                }
-
-                // creo una promesa 'loadComments' para esperar a que los comentarios se cargue durante la suscripción
-                const loadComments = new Promise((resolve) => {
-                    // usamos subscribeToComments() para suscribirnos a la subcolección comments, osea a los comentarios de este post. A esta función le tenemos que pasar el id del post y un callback
-                    subscribeToComments(post.id, (newComments) => {
-                        post.comments = [...newComments] // agregamos el contenido de newComments en post.vomments
-                        resolve()
-                        /* 
-                        resolve() es una función de las promesas de JS y sirve para completar la promesa. Indicia que la función asincrónica terminó
-                        en mi codigo la uso para asegurarme de que se carguen los comentarios
-                        sin esto cuando carga el DOM no aparece ningún comentario hasta que haga un cambio en el input
-                        */
-                    })
-                })
-                await loadComments
-                return post
-            })
+    // recorremos el array posts con un forEach
+    posts.value.forEach((post) => {  
+        // en cada post nos suscribimos a los comentarios para poder ver los cometnarios nuevos cuando se actualizan  
+        subscribeToComments( post.id, // el primer parámetro es el id del documento del posteo 
+            // el segundo parámetro es la función callback
+            (newComments) => { // newComments son los comentarios del posteo con el displayName dinámico 
+                post.comments = newComments // hacemos que post.comments (que lo definimos como un array en getPublicPosts) tenga objetos que representen cada uno, un comentario el user_name transformado y el contenido
+            }
         )
-        loading.value = false
     })
 }) 
 

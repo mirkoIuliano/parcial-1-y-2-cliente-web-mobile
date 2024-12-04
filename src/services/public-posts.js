@@ -1,4 +1,4 @@
-import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
+import { addDoc, collection, getDocs, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
 import { db } from "./firebase" // importamos la variable db que creamos en firebase. Esta es la referencia a la base y la necesitamos para poder escribir o leer datos de la base 
 import { auth } from "./firebase"
 import { getDisplayNameByUserId } from "./user-profile"
@@ -41,61 +41,29 @@ export async function savePulicPost({book_title, review})
     ) 
 }
 
+// Función para obtener los posteos de la base de datos
+export async function getPublicPosts() {
+    const publicPostsCollectionRef = collection(db, "public-posts");
+    const postsQuery = query(publicPostsCollectionRef, orderBy("created_at", "desc"));
 
-/**
- * Función para obtener los posteos de la base de datos
- * 
- * @param {Function} callback 
- */
-export async function subscribeToPublicPosts(callback) // va a recibir un callback como parámetro. Este callback lo ejecutamos dentro del onSnapshot
-{
-    // Para leer los documentos de la collection "public-posts" empezamos por crear la referencia a dicha collection
-    const publicPostsCollectionRef = collection(db, 'public-posts')
-                    // collection es una función de firestore que nos permite obtener una referencia de una collection
+    const snapshot = await getDocs(postsQuery);
+    const posts = await Promise.all(
+        snapshot.docs.map(async (doc) => {
+            const displayName = await getDisplayNameByUserId(doc.data().user_id);
+            return {
+                id: doc.id,
+                user_id: doc.data().user_id,
+                user_name: displayName || "",
+                book_title: doc.data().book_title || "",
+                review: doc.data().review || "",
+                created_at: doc.data().created_at?.toDate(),
+                comments: [], // se inicializa vacío y después se "rellena" con subscribeToComments()
+                commentsModel: { user_comment: "" },
+            };
+        })
+    );
 
-    /*
-        Creamos un "query" (consulta) para traer los registros ordenados por fecha de creación
-        En Firestore se crea una query con una función llamada "query()", que recibe AL MENOS 2 parámetros: 
-        1. Una referencia a una collection  2. Una o más instrucciones de ordenamiento, filtro o límite
-    */
-    const postsQuery = query(
-        publicPostsCollectionRef,
-        orderBy('created_at', "desc") // lo ordenamos de manera descendente porque queremos que los posteos más recientes aparezcan arriba
-    )
-
-    // Para hacer la lectura en tiempo real usamos la función "onSnapshot()". onSnapshot se ejecuta cada vez que haya cambios en la base de datos
-    // Esta función recibe 2 argumentos:
-    // 1. La referencia de la collection o una query  2. El callback a ejecutar cada vez que haya cambios en la base de datos. Este callback recibe como parámetro el QuerySnapshot
-    onSnapshot(postsQuery, async (snapshot) => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión
-        console.log("[public-posts.js subscribeToPublicPosts] Se ejecutó el onSnapshot")
-        const newPosts = await Promise.all ( // como necesitamos llamar a la función asíncrona getDisplayNameByUserId() para obtener el displayName, usamos Promise.all() para esperar a que todas las promesas de getDisplayNameByUserId se resuelvan antes de pasar los datos al callback
-            snapshot.docs.map(async (doc) => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title, review, displayName, etc
-                const displayName = await getDisplayNameByUserId(doc.data().user_id) // getDisplayNameByUserId() es una función de [user-profile.js] que sirve para obtener el nombre de usuario (displayName) de manera dinámica. Sin esta función, si guardamos user_name: doc.data().user_name, va a quedar estático y si se cambia el nombre va a seguir el nombre anterior en vez del actualziado
-                // como respuesta retornamos un objeto que contiene:
-                return {
-                    id: doc.id,
-                    user_id: doc.data().user_id,
-                    user_name: displayName || "", // usamos displayName, que es el nombre dinámico
-                    book_title: doc.data().book_title || "",
-                    review: doc.data().review || "",
-                    /* min 21 clase 9
-                    created_at lo creamos en savePublicPosts usando serverTimestamp. serverTimestamp define un sentinela, que es un indicador para que firebase sepa que el valor de ese campo se tiene que llenar en el servidor. Deja una indicación de que cuando se grabe en el servidor, use la fecha y hora del servidor para guardarse
-                    Como esto recién se crea y se guarda cuando graba en el servidor, en esta primera presentación de los datos, que es local y todavía no se grabó, created_at no se grabó y sería null
-                    Para resolver este problema usamos el optional chain operator para pedir la fecha (es el signo de pregunta '?')
-                    Operador de encadenación opcional
-                    Es lo mismo que el '.', pero antes hace un chequeo
-                    El '.' pide a lo que sea que haya antes una propiedad. Si es null, intenta pedir una propiedad a null y falla porque null no tiene propiedades
-                    Con el '?.' se encarga de que, solo se encadena si el valor anterior no es null o undefined (osea si hay un valor en serio)
-                    Es una forma mucho más abreviada de hacer esto:
-                    created_at: doc.data().created_at ? doc.data().created_at.toDate() : null
-                    */
-                    created_at: doc.data().created_at?.toDate(), // el método toDate() es un método que nos da firebase que sirve para transformar el timestamp que tenemos con created_at y lo convierte a un objeto Date de JS
-                }
-            })
-        ) 
-        callback(newPosts) // ejecutamos la función que recibimos como parámetro, pasándole los posteos ya transformados 
-    })
-    
+    return posts;
 }
 
 // Función para suscribirnos a los comentarios y escuchar los cambios de los comentarios en una publicaición específica
@@ -141,8 +109,8 @@ export async function addCommentToPost(postId, comment) // como parámetros reci
     )
 }
 
-
-export async function getPostsByUserId(userId, callback) {
+// Función para obtener los posteos de un usuario específico
+export async function getPostsByUserId(userId) {
 
     let userPostsQuery
 
@@ -163,25 +131,23 @@ export async function getPostsByUserId(userId, callback) {
         console.error("no se envió ningún Id de usuario para buscar sus publicaciones")
     }
 
-    // uso onSnapshot para que se actualice si alguien hace un nuevo comentario. Como primer parámetro le tenemos que pasar la referencia a la collection o una query y como segundo, la función callback
-    onSnapshot(userPostsQuery, async (snapshot) => { // cada vez que haya un cambio en la base de datos se ejecuta esta fucnión
-        console.log("[pubic-posts.js getPostsByUserId] Se ejecutó el onSnapshot")
-        const userPosts = await Promise.all( // como necesitamos llamar a la función asíncrona getDisplayNameByUserId() para obtener el displayName, usamos Promise.all() para esperar a que todas las promesas de getDisplayNameByUserId se resuelvan antes de pasar los datos al callback
-            snapshot.docs.map(async (doc) => { // hacemos un map, para transformar cada documento en un objeto que tenga un id, user_name, book_title y review
-                const displayName = await getDisplayNameByUserId(doc.data().user_id) // getDisplayNameByUserId() es una función de [user-profile.js] que sirve para obtener el nombre de usuario (displayName) de manera dinámica. Sin esta función, si guardamos user_name: doc.data().user_name, va a quedar estático y si se cambia el nombre va a seguir el nombre anterior en vez del actualziado
-                return {
-                    id: doc.id,
-                    user_id: doc.data().user_id,
-                    user_name: displayName, // usamos displayName, que es el nombre dinámico
-                    book_title: doc.data().book_title || "",
-                    review: doc.data().review || "",
-                    created_at: doc.data().created_at?.toDate(), 
-                    comments: [], // inicializamos como un array vacío para después 'llenarlo' con los datos de subscribeToComments()
-                    commentsModel: { user_comment: "" }, // commentsModel lo creo para el input de comentarios nuevos
-                }
-            })
-        ) 
-        callback(userPosts) // ejecutamos la función que recibimos como parámetro, pasándole los posteos ya transformados 
-    })
+    const postsSnapshot = await getDocs(userPostsQuery)
+    const posts = await Promise.all(
+        postsSnapshot.docs.map(async (doc) => {
+            const displayName = await getDisplayNameByUserId(doc.data().user_id)
+            return {
+                id: doc.id,
+                user_id: doc.data().user_id,
+                user_name: displayName,
+                book_title: doc.data().book_title || "",
+                review: doc.data().review || "",
+                created_at: doc.data().created_at?.toDate(),
+                comments: [], // se inicializa vacío y después se "rellena" con subscribeToComments()
+                commentsModel: { user_comment: "" },
+            }
+        })
+    )
+
+    return posts
 
 }

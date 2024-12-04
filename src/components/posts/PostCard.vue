@@ -57,8 +57,7 @@ async function handleComment (postId, user_comment )
         <div class="mb-3 flex items-center justify-between">
             <div>
                 <h3 class="text-2xl font-semibold text-slate-800">{{ post.book_title }}</h3>
-                <p class="text-sm font-semibold text-slate-400 p-0 m-0">{{ formatDate(post.created_at) || 'Subiendo post...'
-                    }}</p>
+                <p class="text-sm font-semibold text-slate-400 p-0 m-0">{{ formatDate(post.created_at) || 'Recién creado' }}</p>
             </div>
             <router-link 
                 :to="`/usuario/${post.user_id}`"

@@ -6,7 +6,6 @@ import PostCard from '../components/posts/PostCard.vue';
 import { useLoggedUser } from '../compossables/useLoggedUser';
 import { getPostsByUserId, subscribeToComments } from '../services/public-posts';
 import { onMounted, ref } from 'vue';
-import { getDisplayNameByUserId } from '../services/user-profile';
 import BaseHeading from '../components/BaseHeading.vue';
 import NoPostsYet from '/imgs/no-posts-yet.png'
 
@@ -19,7 +18,7 @@ const { loggedUser } = useLoggedUser()
 
 const { user, loading } = useUser(route.params.id) // con useUser conseguimos los datos del usuario especificado por el route.params.id
 
-onMounted(() => {
+onMounted(async () => {
 
     // si entramos al perfil del usuario autenticado lo reenviamos a su perfil (/mi-perfil). No tiene sentido que el propio usuario pueda entrar al UserProfile de él mismo
     if (route.params.id == loggedUser.value.id) {
@@ -29,42 +28,21 @@ onMounted(() => {
 
     loading.value = true
 
-    // a la función getPostsByUserId tenemos que pasarle el id del usuario y una función callback
-    getPostsByUserId(route.params.id, async (userPosts) => { // userPosts es el resultado de getPostsByUserId()
+    // traemos todos los posteos del usuario con getPostsByUserId
+    posts.value = await getPostsByUserId(route.params.id) // guardamos en el el array posts[] todas las publicaciones del usuario
 
-        // al array posts le vamos a agregar lo siguiente
-        posts.value = await Promise.all(
-
-            userPosts.map(async (userPost) => { // hacemos un map de userPosts y ahora 'userPost' va a representar a cada uno de los docuemntos del usuario
-
-                // creo comments y lo inicializo como un array vacío
-                userPost.comments = []
-
-                // creo commentsModel, que va a servir para que el input de comentarios sea independiente para cada publicación 
-                userPost.commentsModel = { 
-                    user_comment: "" // campo para capturar el comentario del usuario
-                }
-
-                // creo una promesa 'loadComments' para esperar a que los comentarios se cargue durante la suscripción
-                const loadComments = new Promise((resolve) => {
-                    // usamos subscribeToComments() para suscribirnos a la subcolección comments, osea a los comentarios de este post. A esta función le tenemos que pasar el id del post y un callback
-                    subscribeToComments(userPost.id, (newComments) => {
-                        userPost.comments = [...newComments] // agregamos el contenido de newComments en userPost.comments
-                        resolve()
-                        /* 
-                        resolve() es una función de las promesas de JS y sirve para completar la promesa. Indicia que la función asincrónica terminó
-                        en mi codigo la uso para asegurarme de que se carguen los comentarios
-                        sin esto cuando carga el DOM no aparece ningún comentario hasta que haga un cambio en el input
-                        */
-                    })
-                })
-                await loadComments
-                return userPost
-            })
+    // recorremos el array posts con un forEach
+    posts.value.forEach((post) => {  
+        // en cada post nos suscribimos a los comentarios para poder ver los cometnarios nuevos cuando se actualizan  
+        subscribeToComments( post.id, // el primer parámetro es el id del documento del posteo 
+            // el segundo parámetro es la función callback
+            (newComments) => { // newComments son los comentarios del posteo con el displayName dinámico 
+                post.comments = newComments // hacemos que post.comments (que lo definimos como un array en getPublicPosts) tenga objetos que representen cada uno, un comentario el user_name transformado y el contenido
+            }
         )
-        loading.value = false
-    })}
-) 
+    })
+
+}) 
 
 </script>
 
