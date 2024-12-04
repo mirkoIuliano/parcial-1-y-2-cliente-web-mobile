@@ -13,7 +13,7 @@ const newPost = ref({
 })
 
 // el mensaje de error va a estar en la siguiente variable
-const errorMessage = ref('');
+const errorMessage = ref('')
 
 function handleSubmit(){
 

@@ -13,10 +13,15 @@ const editData = ref({
     bio: '',
 })
 
+// el mensaje de exito se va a estar en la siguiente variable
+const successMessage = ref("")
+
 // el mensaje de error va a estar en la siguiente variable
-const errorMessage = ref('');
+const errorMessage = ref('')
 
 const handleSubmit = async () => {
+
+    successMessage.value = ""
 
     /*---------- Validaciones ----------*/
     if (editData.value.displayName.length != 0 && editData.value.displayName.length < 3) {
@@ -46,7 +51,8 @@ const handleSubmit = async () => {
     } catch (error) {
         // TODO: Manejar el error y mostrar un mensaje de feedback
     }
-
+    
+    successMessage.value = "¡Se actaulizó la foto de perfil con éxito!"
     errorMessage.value = ""
     // cuando termine ponemos el loading en false de vuelta
     loading.value = false;
@@ -103,9 +109,12 @@ onUnmounted(() => {
         ></textarea>
     </div>
 
-    <!-- Mensaje de error -->
-    <div v-if="errorMessage" class="text-red-500 mb-4">
+    <!-- Mensaje de error y de éxito -->
+    <div v-if="errorMessage " class="text-red-500 mb-4">
         {{ errorMessage }}
+    </div>
+    <div v-if="successMessage" class="text-green-600 font-medium mb-4">
+        {{ successMessage }}
     </div>
 
     <button type="submit" class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 focus:bg-slate-700 transition-colors duration-200">

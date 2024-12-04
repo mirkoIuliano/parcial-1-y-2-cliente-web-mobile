@@ -16,10 +16,10 @@ defineProps({
 
 <template>
     <div class="m-auto max-w-96">
-        <div class="flex justify-center">
+        <div class="flex justify-center my-2">
             <img 
                 :src="user.photoURL || NoPhoto" 
-                class="w-64 h-64 object-cover"
+                class="w-64 h-64 object-cover border rounded-full"
             >
             <!-- En vez de usar como componente (NoPhoto) podemos llamar a la foto directamente así:
             <img 

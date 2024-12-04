@@ -10,6 +10,7 @@ const editData = ref({
 
 const loading = ref(false)
 
+// el mensaje de exito se va a estar en la siguiente variable
 const successMessage = ref("")
 
 async function handleSubmit() {
@@ -101,12 +102,12 @@ async function handleFileSelection(ev) {
         
         </form>
         <div class="w-1/2">
-            <h2 class="mb-2 text-lg font-semibold text-slate-700">Previsualización</h2>
-            <div class="h-72 flex items-center justify-center border border-dashed rounded-md border-slate-300 bg-slate-50">
+            <h2 class="mb-2 text-lg font-semibold text-slate-700 text-center">Previsualización</h2>
+            <div class="w-64 h-64 flex items-center justify-center border border-dashed border-slate-300 bg-slate-50 rounded-full m-auto">
                 <img 
                     v-if="editData.photoPreview" 
                     :src="editData.photoPreview" 
-                    class="w-64 h-64 object-cover rounded-md"
+                    class="w-64 h-64 object-cover border rounded-full"
                 >
             </div>
         </div>

@@ -17,9 +17,11 @@ const repeatedPassword = ref('')
 const loading = ref(false)
 
 // el mensaje de error va a estar en la siguiente variable
-const errorMessage = ref('');
+const errorMessage = ref('')
 
 async function handleSubmit(){
+
+    /*---------- Validaciones ----------*/
     // primero validamos que las contraseñas coincidan
     if (newUser.value.password !== repeatedPassword.value) {
         errorMessage.value = 'Las contraseñas ingresadas no son idénticas';
@@ -29,12 +31,14 @@ async function handleSubmit(){
     if(newUser.value.password.length < 6){
         return errorMessage.value = 'La contraseña debe tener un mínimo de 6 caracteres';
     }
+    /*---------- Fin de validaciones ----------*/
 
     loading.value = true
     try {
         await register({...newUser.value}) // llamamos a la función register() y le pasamos un objeto con los datos del newUser (osea los datos ingresados en el fomrulario)
     } catch (error) {
         console.error("[Register handleSubmit] Error al registrarse: ", error)
+        loading.value = false
         return errorMessage.value = "Ocurrió un error al intentar registrarse. Por favor intentar de nuevo"
     }
 
@@ -89,7 +93,7 @@ async function handleSubmit(){
         {{ errorMessage }}
     </div>
 
-    <button type="submit" class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 transition-colors duration-200"
+    <button type="submit" class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 focus:bg-slate-700 transition-colors duration-200"
     >{{ !loading ? "Registrarse" : "Creando cuenta..."}}</button>
 
     </form>
