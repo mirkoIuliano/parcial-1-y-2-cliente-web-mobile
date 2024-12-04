@@ -13,9 +13,9 @@ import BaseHeading from '../components/BaseHeading.vue';
             </p>
 
             <router-link 
-                to="/publicaciones" 
+                to="/registrarse" 
                 class="mt-6 inline-block bg-cyan-700 text-white px-6 py-3 rounded-md text-lg font-medium hover:bg-cyan-800 focus:bg-cyan-800 transition-colors"
-            > Ver Publicaciones </router-link>
+            > Crear Cuenta </router-link>
         </div>
     </section>
 
