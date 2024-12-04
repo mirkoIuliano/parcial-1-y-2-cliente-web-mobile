@@ -15,11 +15,10 @@ defineProps({
 </script>
 
 <template>
-    <div class="m-auto">
-        <div>
+    <div class="m-auto max-w-96">
+        <div class="flex justify-center">
             <img 
-                :src="user.photoURL || NoPhoto" 
-                alt=""
+                :src="user.photoURL || NoPhoto"
                 class="w-64 h-64"
             >
             <!-- En vez de usar como componente (NoPhoto) podemos llamar a la foto directamente así:
@@ -30,8 +29,8 @@ defineProps({
         </div>
         <div>
             <p class="font-bold mb-1 text-xl">{{ user.displayName || "" }}</p>
-            <p class="mb-1">{{ user.bio || "Todavía no tiene biografía..." }}</p>
-            <p class="mb-1">{{ user.email }}</p>
+            <p class="mb-1 text-cyan-800 font-medium">{{ user.email }}</p>
+            <p class="mb-1">{{ user.bio || "" }}</p>
         </div>
     </div>
 

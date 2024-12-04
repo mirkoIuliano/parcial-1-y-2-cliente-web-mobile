@@ -41,7 +41,6 @@ function handleSubmit(){
     if (newPost.value.review.length > 2000) {
         return errorMessage.value = "La reseña puede tener como máximo 2000 caracteres"
     }
-
     /*---------- Fin de validaciones ----------*/
 
     console.log("Se envió el formulario de posteo nuevo")

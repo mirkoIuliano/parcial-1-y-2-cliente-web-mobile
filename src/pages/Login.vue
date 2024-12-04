@@ -60,5 +60,7 @@ async function handleSubmit(){
     </div>
     <button type="submit" class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 transition-colors duration-200">Ingresar</button>
 
+    <p class="mt-4 text-slate-600">¿No tienes cuenta? <router-link class="text-cyan-700 font-medium" to="/registrarse">Regístrate</router-link></p>
+
     </form>
 </template>

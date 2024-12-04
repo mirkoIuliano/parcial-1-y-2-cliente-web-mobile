@@ -124,7 +124,7 @@ onMounted( async () => {
             <div v-if="posts.length === 0 && !loading" class="flex flex-col items-center gap-8 mb-8">
                 <p class="text-center text-slate-500 text-2xl">Todavía no existen posteos...</p>
                 <div>
-                    <img :src="NoPostsYet" alt="" class="w-60 h-60">
+                    <img :src="NoPostsYet" class="w-60 h-60">
                 </div>
                 <div class="flex flex-col items-center gap-4">
                     <p class="text-slate-700 font-bold text-2xl">¡Crea el primer posteo!</p>

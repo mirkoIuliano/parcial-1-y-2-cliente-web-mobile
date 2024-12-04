@@ -66,7 +66,7 @@ function handleLogout(){
     </main>
 
     <footer class="flex justify-center items-center bg-slate-800 text-white h-25">
-        <p>Copyright © Da Vinci 2024</p>
+        <p>Mirko Iuliano | Copyright © Da Vinci 2024</p>
     </footer>
 
 </template>

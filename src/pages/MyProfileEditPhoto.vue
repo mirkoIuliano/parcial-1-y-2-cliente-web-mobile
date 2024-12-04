@@ -74,17 +74,17 @@ async function handleFileSelection(ev) {
 <template>
     <BaseHeading>Editar mi foto de Perfil</BaseHeading>
 
-    <div class="flex gap-4 items-start">
+    <div class="flex flex-row gap-6 items-start max-w-4xl m-auto bg-white p-8 rounded-lg shadow-lg border border-slate-300 my-8">
         <form class="w-1/2"
             action="#"
             @submit.prevent=handleSubmit
         >
-        <div class="mb-4">
-            <label for="photo" class="block mb-2">Foto de Perfil</label>
+        <div class="mb-6">
+            <label for="photo" class="block mb-2 text-lg font-semibold text-slate-700">Foto de Perfil</label>
             <input 
                 type="file"
                 id="photo" 
-                class="p-2 min-h-10 w-full border rounded" 
+                class="block w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" 
                 @change="handleFileSelection"
             >
             <!-- como es un input de tipo file no se puede usar v-model y en reemplazo usamos un evento de tipo change -->
@@ -94,12 +94,14 @@ async function handleFileSelection(ev) {
 
         </form>
         <div class="w-1/2">
-            <h2>Previsualización</h2>
-            <img 
-                v-if="editData.photoPreview" 
-                :src="editData.photoPreview" 
-                alt=""
-            >
+            <h2 class="mb-2 text-lg font-semibold text-slate-700">Previsualización</h2>
+            <div class="h-72 flex items-center justify-center border border-dashed rounded-md border-slate-300 bg-slate-50">
+                <img 
+                    v-if="editData.photoPreview" 
+                    :src="editData.photoPreview" 
+                    class="w-64 h-64 rounded-md"
+                >
+            </div>
         </div>
     </div>
 

@@ -13,7 +13,29 @@ const editData = ref({
     bio: '',
 })
 
+// el mensaje de error va a estar en la siguiente variable
+const errorMessage = ref('');
+
 const handleSubmit = async () => {
+
+    /*---------- Validaciones ----------*/
+    if (editData.value.displayName.length != 0 && editData.value.displayName.length < 3) {
+        return errorMessage.value = "El nombre de usuario debe tener por lo menos 3 caracteres"
+    }
+    
+    if (editData.value.displayName.length > 24) {
+        return errorMessage.value = "El nombre de usuario puede tener como máximo 24 caracteres"
+    }
+    
+    if (editData.value.bio.length != 0 && editData.value.bio.length < 5) {
+        return errorMessage.value = "La biografía debe tener por lo menos 5 caracteres"
+    }
+
+    if (editData.value.bio.length > 240) {
+        return errorMessage.value = "La biografía puede tener como máximo 240 caracteres"
+    }
+    /*---------- Fin de validaciones ----------*/
+
     // Preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
     if(loading.value) return; // Si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
     
@@ -25,6 +47,7 @@ const handleSubmit = async () => {
         // TODO: Manejar el error y mostrar un mensaje de feedback
     }
 
+    errorMessage.value = ""
     // cuando termine ponemos el loading en false de vuelta
     loading.value = false;
 }
@@ -51,22 +74,14 @@ onUnmounted(() => {
     <form 
         action="#"
         @submit.prevent="handleSubmit"
-    >   
-    <div class="mb-4">
-        <label for="bio" class="block mb-2">Biografía</label>
-        <textarea 
-            id="bio" 
-            class="p-2 min-h-10 w-full border rounded read-only:bg-gray-200" 
-            :readonly="loading"
-            v-model="editData.bio"
-        ></textarea>
-    </div>
-    <div class="mb-4">
-        <label for="displayName" class="block mb-2">Nombre de Usuario</label>
+        class="w-2/4 border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8"
+    >
+    <div class="mb-5">
+        <label for="displayName" class="block mb-2 text-lg font-semibold text-slate-700">Nombre de Usuario</label>
         <input 
             type="text" 
             id="displayName" 
-            class="p-2 w-full border rounded read-only:bg-gray-200"
+            class="px-4 py-2 border border-slate-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
             :readonly="loading"
             v-model="editData.displayName"
         >
@@ -77,11 +92,25 @@ onUnmounted(() => {
                 - read-only es un modificador de Tailwind, que hace que cuando el campo esté como 'readonly' le agregamos ese color de fondo
         -->
     </div>
+    <div class="mb-5">
+        <label for="bio" class="block mb-2 text-lg font-semibold text-slate-700">Biografía</label>
+        <textarea 
+            type="text"
+            id="bio" 
+            class="px-4 py-2 border border-slate-300 rounded-md w-full h-32 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+            :readonly="loading"
+            v-model="editData.bio"
+        ></textarea>
+    </div>
 
-    <button type="submit">
+    <!-- Mensaje de error -->
+    <div v-if="errorMessage" class="text-red-500 mb-4">
+        {{ errorMessage }}
+    </div>
+
+    <button type="submit" class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 transition-colors duration-200">
         <!-- esto lo hacemos para mostrar que, mientras se esté grabando aparezca Grabando... y cuando termine/no esté grabando "Guardar Cambios" -->
         {{ !loading ? "Guardar Cambios" : "Grabando..." }}
     </button>
-
     </form>
 </template>
