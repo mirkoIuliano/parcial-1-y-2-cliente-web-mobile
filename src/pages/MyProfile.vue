@@ -6,9 +6,12 @@ import ProfileData from '../components/profile/ProfileData.vue';
 import PostCard from '../components/posts/PostCard.vue';
 import { useLoggedUser } from '../compossables/useLoggedUser';
 import BaseHeading from '../components/BaseHeading.vue';
+import NoPostsYet from '/imgs/no-posts-yet.png'
 
 // creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 
 const { loggedUser } = useLoggedUser()
+
+const loading = ref(true)
 
 const posts = ref([])
 
@@ -37,6 +40,7 @@ onMounted(() => {
                 }
             })
         )
+        loading.value = false
     })
 }) 
 
@@ -61,6 +65,18 @@ onMounted(() => {
     </div>
 
     <BaseHeading class="mb-10">Mis posteos</BaseHeading>
+
+    <p v-if="loading" class="text-2xl text-slate-700 text-center mt-14">Cargando posteos...</p>
+
+    <article class="flex items-center justify-center mb-12">
+        <div v-if="posts.length === 0 && !loading" class="flex flex-col items-center gap-8 mb-8">
+            <p class="text-center text-slate-500 text-2xl">Todavía no existen posteos...</p>
+            <div>
+                <img :src="NoPostsYet" class="w-60 h-60">
+            </div>
+        </div>
+    </article>
+
     <PostCard 
         v-for="post in posts"
         :key="post.id" 

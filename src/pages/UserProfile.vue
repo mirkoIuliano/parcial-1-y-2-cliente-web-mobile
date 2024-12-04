@@ -8,6 +8,7 @@ import { getPostsByUserId } from '../services/public-posts';
 import { onMounted, ref } from 'vue';
 import { getDisplayNameByUserId } from '../services/user-profile';
 import BaseHeading from '../components/BaseHeading.vue';
+import NoPostsYet from '/imgs/no-posts-yet.png'
 
 const route = useRoute()
 
@@ -67,12 +68,22 @@ onMounted(() => {
     </div>
 
     <BaseHeading>Posteos</BaseHeading>
-    <p class="text-center" v-if="loading">Cargando posteos...</p>
+
+    <p v-if="loading" class="text-2xl text-slate-700 text-center mt-14">Cargando posteos...</p>
+
+    <article class="flex items-center justify-center mb-12">
+        <div v-if="posts.length === 0 && !loading" class="flex flex-col items-center gap-8 mb-8">
+            <p class="text-center text-slate-500 text-2xl">Todavía no existen posteos...</p>
+            <div>
+                <img :src="NoPostsYet" class="w-60 h-60">
+            </div>
+        </div>
+    </article>
+
     <PostCard
         v-if="posts"
         v-for="post in posts" 
         :post="post" 
         :loggedUser="loggedUser"
     />
-    <p class="text-center" v-if="!loading && posts == false">No existen posteos de este usuario</p>
 </template>

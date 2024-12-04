@@ -3,14 +3,14 @@ import { ref } from 'vue';
 import { editMyProfilePhoto } from '../services/auth';
 import BaseHeading from '../components/BaseHeading.vue';
 
-
-
 const editData = ref({
     photo: null,
     photoPreview: null,
 })
 
 const loading = ref(false)
+
+const successMessage = ref("")
 
 async function handleSubmit() {
     // Preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
@@ -24,6 +24,7 @@ async function handleSubmit() {
         // TODO
     }
 
+    successMessage.value = "¡Se actaulizó la foto de perfil con éxito!"
     loading.value = false
 }
 
@@ -64,8 +65,6 @@ async function handleFileSelection(ev) {
 
     reader.readAsDataURL(editData.value.photo)
 
-
-
 }
 
 
@@ -90,8 +89,14 @@ async function handleFileSelection(ev) {
             <!-- como es un input de tipo file no se puede usar v-model y en reemplazo usamos un evento de tipo change -->
         </div>
 
+        
         <button class="w-2/4 bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 transition-colors duration-200">{{ !loading ? 'Actualizar Foto' : 'Enviando...'}}</button>
 
+        <!-- Mensaje de éxito -->
+        <div v-if="successMessage" class="text-green-600 font-medium mt-4">
+            {{ successMessage }}
+        </div>
+        
         </form>
         <div class="w-1/2">
             <h2 class="mb-2 text-lg font-semibold text-slate-700">Previsualización</h2>

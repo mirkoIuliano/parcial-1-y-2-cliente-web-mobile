@@ -120,7 +120,6 @@ onMounted( async () => {
         <p v-if="loading" class="text-2xl text-slate-700 text-center mt-14">Cargando posteos...</p>
 
         <article class="min-h-[60%] flex items-center justify-center">
-    
             <div v-if="posts.length === 0 && !loading" class="flex flex-col items-center gap-8 mb-8">
                 <p class="text-center text-slate-500 text-2xl">Todavía no existen posteos...</p>
                 <div>
