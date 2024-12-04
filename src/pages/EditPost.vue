@@ -31,13 +31,12 @@ const errorMessage = ref('')
 const successMessage = ref("")
 
 onMounted(async () => {
-    console.log(postId)
 
     post = await getPostById(postId)
 
     // si el id del usuario autenticado no es el mismo que el del usuario que creó el posteo te redirecciona a publicaciones
     if(loggedUser.value.id != post.user_id) {
-        console.error ("No puedes editar un posteo que no has hecho tu", loggedUser.id, post.user_id)
+        alert ("No puedes editar un posteo que haya hecho otro usuario", loggedUser.id, post.user_id)
         return router.push('/publicaciones')
     }
 
