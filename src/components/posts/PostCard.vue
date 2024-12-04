@@ -1,8 +1,8 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { addCommentToPost } from '../../services/public-posts';
-import { formatDate } from '../../helpers/date';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { addCommentToPost } from '../../services/public-posts'
+import { formatDate } from '../../helpers/date'
 
 const props = defineProps({
     post: {
@@ -22,27 +22,30 @@ async function handleComment (postId, user_comment )
 {
     // Establecemos el estado de carga solo para este post. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
     if(loading.value) return // evita múltiples clics mientras se envía
+    if (!user_comment.trim()) return // esto hace que no se permitan comentarios vacíos
 
     console.log("mandando comentario...")
-
-    // Establecemos el estado de carga solo para este post
-    loading.value = true
 
     // Con el '?.' se encarga de que, solo se encadena si el valor anterior no es null o undefined (osea si hay un valor en serio)
     if (!props.loggedUser?.id){ // si el usuario que quiere comentar no está autenticado:
         alert("Para comentar es necesario iniciar sesión primero")
         router.push('/iniciar-sesion')
-    } else {
-        // addCommentToPost de [publi-posts.js] es una función que agrega un comentario en el array comments del document del posteo
+    } 
+    
+    // Establecemos el estado de carga solo para este post
+    loading.value = true
+
+    try {
+        // addCommentToPost de [publi-posts.js] es una función que agrega un comentario en la subcolección comments del docuemtn del posteo
         await addCommentToPost( postId, // el primer primer parámetro es el id del documento (osea, el id del posteo al que el comentario pertenece)
         { // como segundo parámetro un objeto con los datos del comentario
             user_comment, // el contenido del comentario
             comment_user_id: props.loggedUser.id // el id del usuario autenticado que lo hizo
-        }
-    )
+        })
+        props.post.commentsModel.user_comment = ""
+    } catch (error) {
+        console.error("Error al intentar agregar un comentario", error)
     }
-
-    // Restablecemos el estado de carga una vez que se termine de ejecutar todo
     loading.value = false
 }
 

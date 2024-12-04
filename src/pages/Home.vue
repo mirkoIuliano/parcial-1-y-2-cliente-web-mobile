@@ -1,5 +1,5 @@
 <script setup>
-import BaseHeading from '../components/BaseHeading.vue';
+import BaseHeading from '../components/BaseHeading.vue'
 </script>
 
 <template>

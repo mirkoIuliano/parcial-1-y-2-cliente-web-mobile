@@ -52,8 +52,8 @@ function handleSubmit(){
     
 
     // cuando termina todo el proceso de guardar el nuevo posteo borramos los dos campos
-    newPost.value.book_title = '';
-    newPost.value.review = '';
+    newPost.value.book_title = ''
+    newPost.value.review = ''
 
     router.push('/publicaciones')
 }

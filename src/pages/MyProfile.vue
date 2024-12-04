@@ -1,11 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { getPostsByUserId } from '../services/public-posts';
-import { getDisplayNameByUserId } from '../services/user-profile';
-import ProfileData from '../components/profile/ProfileData.vue';
-import PostCard from '../components/posts/PostCard.vue';
-import { useLoggedUser } from '../compossables/useLoggedUser';
-import BaseHeading from '../components/BaseHeading.vue';
+import { onMounted, ref } from 'vue'
+import { getPostsByUserId } from '../services/public-posts'
+import { getDisplayNameByUserId } from '../services/user-profile'
+import ProfileData from '../components/profile/ProfileData.vue'
+import PostCard from '../components/posts/PostCard.vue'
+import { useLoggedUser } from '../compossables/useLoggedUser'
+import BaseHeading from '../components/BaseHeading.vue'
 import NoPostsYet from '/imgs/no-posts-yet.png'
 
 // creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 

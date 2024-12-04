@@ -1,6 +1,6 @@
 import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
 import { db } from "./firebase" // importamos la variable db que creamos en firebase. Esta es la referencia a la base y la necesitamos para poder escribir o leer datos de la base 
-import { arrayUnion, updateDoc } from "firebase/firestore"
+import { arrayUnion } from "firebase/firestore"
 import { auth } from "./firebase"
 import { getDisplayNameByUserId } from "./user-profile"
 
@@ -36,7 +36,6 @@ export async function savePulicPost({book_title, review})
             user_id: user.uid, // pasamos el id del usuario
             book_title,
             review,
-            comments: [], // agregamos un array vacío donde se van a guardar los comentarios 
             created_at: serverTimestamp(), 
             // usamos la función serverTimestamp para guardar la fecha de creación. Esta función deja indicado que queremos que cuando el registro se grabe en el servidor, se tome la fecha y la hora del servidor 
         }
@@ -80,8 +79,6 @@ export async function subscribeToPublicPosts(callback) // va a recibir un callba
                     user_name: displayName || "", // usamos displayName, que es el nombre dinámico
                     book_title: doc.data().book_title || "",
                     review: doc.data().review || "",
-                    comments: doc.data().comments || [], // si falta, devuelve un array vacío
-                    
                     /* min 21 clase 9
                     created_at lo creamos en savePublicPosts usando serverTimestamp. serverTimestamp define un sentinela, que es un indicador para que firebase sepa que el valor de ese campo se tiene que llenar en el servidor. Deja una indicación de que cuando se grabe en el servidor, use la fecha y hora del servidor para guardarse
                     Como esto recién se crea y se guarda cuando graba en el servidor, en esta primera presentación de los datos, que es local y todavía no se grabó, created_at no se grabó y sería null
@@ -102,23 +99,47 @@ export async function subscribeToPublicPosts(callback) // va a recibir un callba
     
 }
 
-// Función para agregar un comentario al post
+// Función para suscribirnos a los comentarios y escuchar los cambios de los comentarios en una publicaición específica
+export async function subscribeToComments(postId, callback) {
+    // hacemos la referencia a la subcollection de comments del post (osea el docuemnt) específico
+    const commentsCollectionRef = collection(db, 'public-posts', postId, 'comments')
+
+    // creamos la query para traerlos en orden ascendente
+    const commentsQuery = query(commentsCollectionRef, orderBy('created_at', 'asc')) 
+
+    // con onSnapshota hacemos que cada vez que escuche un cambio se active la función callback
+    onSnapshot(commentsQuery, async (snapshot) => {
+        // en comments se van a guardar los comentarios con el diplayName dinámico
+        const comments = await Promise.all(
+            snapshot.docs.map(async (doc) => {
+                const displayName = await getDisplayNameByUserId(doc.data().comment_user_id)
+                return {
+                    id: doc.id,
+                    comment_user_id: doc.data().comment_user_id,
+                    user_comment: doc.data().user_comment,
+                    user_name: displayName || "",
+                    created_at: doc.data().created_at?.toDate(),
+                }
+            })
+        )
+        callback(comments)
+    })
+}
+
+// Función para agregar una subcollection que represente los comentarios al documento del post
 export async function addCommentToPost(postId, comment) // como parámetros recibe el id del post y el contenido del comentario (el id del que comnetó y el contenido de ese comentario) 
 {
     console.log("[public-posts.js addCommentToPost] Se ejecutó la función")
-    // postDocumentRef va a tener la referencia al documento de la publicación específica
-    const postDocumentRef = doc(db, 'public-posts', postId); // usamos doc para poder buscar en la collection 'public.posts' el documento específico al cual se le está agregando un comentario
+    // commentsCollectionRef  va a tener la referencia a la subcolección comments de la publicación específica
+    const commentsCollectionRef  = collection(db, 'public-posts', postId, 'comments'); // usamos collection para poder buscar en la subcollection 'comments', en la collection 'public.posts', del documento específico al cual se le está agregando un comentario
 
-    // usamos updateDoc para editar el documento 
-    await updateDoc(postDocumentRef, // como primer parámetro le pasamos la referencia al documento específico
+    // usamos addDoc para agregar documento 
+    await addDoc(commentsCollectionRef , // como primer parámetro le pasamos la referencia a la subcollection
         { // como segundo parámetro le pasamos un objeto con los datos que queremos agregar
-            comments: arrayUnion( // uso la función arrayUnion() para agregar datos al array comments, que está dentro de nuestro docuemento del post
-                { 
-                    ...comment, // le agregamos todo lo que contenga comment (que es el user_comment y el comment_user_id)
-                }
-            ) 
+            ...comment, // le agregamos todo lo que contenga comment (que es el user_comment y el comment_user_id),
+            created_at: serverTimestamp(),
         }
-    );
+    )
 }
 
 

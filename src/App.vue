@@ -1,7 +1,7 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { logout, subscribeToAuthChanges } from './services/auth';
-import { useRouter } from 'vue-router';
+import { onMounted, ref } from 'vue'
+import { logout, subscribeToAuthChanges } from './services/auth'
+import { useRouter } from 'vue-router'
 import Logo from '/imgs/logo.png'
 
 // vamos a obtener la instancia del router usando la función useRouter

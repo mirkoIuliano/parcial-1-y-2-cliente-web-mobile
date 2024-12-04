@@ -1,7 +1,7 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
-import { editMyProfile, subscribeToAuthChanges } from '../services/auth';
-import BaseHeading from '../components/BaseHeading.vue';
+import { onMounted, onUnmounted, ref } from 'vue'
+import { editMyProfile, subscribeToAuthChanges } from '../services/auth'
+import BaseHeading from '../components/BaseHeading.vue'
 
 // creamos "unsubscribeFromAuth" y la definimos como una función vacía (porque después vamos a igual "unsubscribeFromAuth" a una función)
 let unsubscribeFromAuth = () => {}
@@ -42,9 +42,9 @@ const handleSubmit = async () => {
     /*---------- Fin de validaciones ----------*/
 
     // Preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
-    if(loading.value) return; // Si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
+    if(loading.value) return // Si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
     
-    loading.value = true;
+    loading.value = true
     
     try {
         await editMyProfile({...editData.value}) // llamamos a la función editMyProfile y le pasamos un objeto con la copia de los datos que queremos editar
@@ -55,7 +55,7 @@ const handleSubmit = async () => {
     successMessage.value = "¡Se actaulizó la foto de perfil con éxito!"
     errorMessage.value = ""
     // cuando termine ponemos el loading en false de vuelta
-    loading.value = false;
+    loading.value = false
 }
 
 onMounted(()=> {

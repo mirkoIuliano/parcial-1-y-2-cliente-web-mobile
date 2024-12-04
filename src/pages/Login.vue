@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { login } from '../services/auth';
+import { ref } from 'vue'
+import { login } from '../services/auth'
 import { useRouter } from 'vue-router'
 import BaseHeading from '../components/BaseHeading.vue'
 

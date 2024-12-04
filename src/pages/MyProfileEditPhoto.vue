@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue';
-import { editMyProfilePhoto } from '../services/auth';
-import BaseHeading from '../components/BaseHeading.vue';
+import { ref } from 'vue'
+import { editMyProfilePhoto } from '../services/auth'
+import BaseHeading from '../components/BaseHeading.vue'
 
 const editData = ref({
     photo: null,
