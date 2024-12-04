@@ -33,7 +33,7 @@ import BaseHeading from '../components/BaseHeading.vue';
             <div class="max-w-xs text-center">
                 <h3 class="text-xl font-semibold text-cyan-950 mb-2">Chat Privado</h3>
                 <p class="text-slate-600">
-                    Conéctate con otros lectores a través del chat privado y comparte recomendaciones
+                    Conectate con otros lectores a través del chat privado y comparte recomendaciones
                 </p>
             </div>
 
