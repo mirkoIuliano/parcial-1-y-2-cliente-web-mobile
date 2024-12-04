@@ -65,7 +65,7 @@ function handleSubmit(){
     <form 
     action="#" 
     @submit.prevent="handleSubmit"
-    class="w-2/4 border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8"
+    class="w-2/4 min-w-[500px] border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8"
     >
 
         <div class="mb-5">
@@ -94,7 +94,7 @@ function handleSubmit(){
             {{ errorMessage }}
         </div>
 
-        <button class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 transition-colors duration-200">Postear</button>
+        <button class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 focus:bg-slate-700 transition-colors duration-200">Postear</button>
     </form>
 
 

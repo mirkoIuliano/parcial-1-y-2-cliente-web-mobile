@@ -1,5 +1,5 @@
 <script setup>
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import ProfileData from '../components/profile/ProfileData.vue';
 import { useUser } from '../compossables/useUser';
 import PostCard from '../components/posts/PostCard.vue';
@@ -11,20 +11,26 @@ import BaseHeading from '../components/BaseHeading.vue';
 import NoPostsYet from '/imgs/no-posts-yet.png'
 
 const route = useRoute()
+const router = useRouter()
 
 const posts = ref([])
 
 const { loggedUser } = useLoggedUser()
 
-const id = route.params.id
-
-const { user, loading } = useUser(id) // con useUser conseguimos los datos del usuario especificado por el id
+const { user, loading } = useUser(route.params.id) // con useUser conseguimos los datos del usuario especificado por el route.params.id
 
 onMounted(() => {
+
+    // si entramos al perfil del usuario autenticado lo reenviamos a su perfil. No tiene sentido que el propio usuario pueda entrar al UserProfile de él mismo
+    if (route.params.id == loggedUser.value.id) {
+        router.push('/mi-perfil')
+        return console.log("son la misma perosna")
+    }
+
     loading.value = true
 
     // a la función getPostsByUserId tenemos que pasarle el id del usuario y una función callback
-    getPostsByUserId(id, async (userPosts) => { // userPosts es el resultado de getPostsByUserId()
+    getPostsByUserId(route.params.id, async (userPosts) => { // userPosts es el resultado de getPostsByUserId()
         // al array posts le vamos a agregar lo siguiente
         posts.value = await Promise.all(
             userPosts.map(async (userPost) => { // hacemos un map de userPosts y ahora 'userPost' va a representar a cada uno de los docuemntos del usuario
@@ -53,7 +59,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <BaseHeading>Perfil de {{ user.displayName || user.email }}</BaseHeading>
+    <BaseHeading v-if="loading">Perfil de cargando...</BaseHeading>
+    <BaseHeading v-else>Perfil de {{ user.displayName || user.email }}</BaseHeading>
+    
     <div class="flex flex-col mb-8 border-b-2 w-[80%] m-auto pb-8">
         <ProfileData :user="user"/>
         

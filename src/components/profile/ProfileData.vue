@@ -18,8 +18,8 @@ defineProps({
     <div class="m-auto max-w-96">
         <div class="flex justify-center">
             <img 
-                :src="user.photoURL || NoPhoto"
-                class="w-64 h-64"
+                :src="user.photoURL || NoPhoto" 
+                class="w-64 h-64 object-cover"
             >
             <!-- En vez de usar como componente (NoPhoto) podemos llamar a la foto directamente así:
             <img 

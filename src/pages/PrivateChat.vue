@@ -102,6 +102,6 @@ async function handleSubmit() {
             class="w-full min-h-10 p-2 border rounded"
             v-model="newMessage.text"
         ></textarea>
-        <button class="ml-2 bg-slate-800 text-white px-4 py-1 rounded-md font-medium text-base hover:bg-slate-700 transition-colors duration-200" type="submit">Enviar</button>
+        <button class="ml-2 bg-slate-800 text-white px-4 py-1 rounded-md font-medium text-base hover:bg-slate-700 focus:bg-slate-700 transition-colors duration-200" type="submit">Enviar</button>
     </form>
 </template>

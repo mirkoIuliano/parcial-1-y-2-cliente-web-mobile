@@ -74,7 +74,7 @@ onUnmounted(() => {
     <form 
         action="#"
         @submit.prevent="handleSubmit"
-        class="w-2/4 border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8"
+        class="w-2/4 min-w-[500px] border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8"
     >
     <div class="mb-5">
         <label for="displayName" class="block mb-2 text-lg font-semibold text-slate-700">Nombre de Usuario</label>
@@ -108,7 +108,7 @@ onUnmounted(() => {
         {{ errorMessage }}
     </div>
 
-    <button type="submit" class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 transition-colors duration-200">
+    <button type="submit" class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 focus:bg-slate-700 transition-colors duration-200">
         <!-- esto lo hacemos para mostrar que, mientras se esté grabando aparezca Grabando... y cuando termine/no esté grabando "Guardar Cambios" -->
         {{ !loading ? "Guardar Cambios" : "Grabando..." }}
     </button>

@@ -24,6 +24,10 @@ const routes = [
     {
         path:'/publicaciones', 
         component: PostsPage,
+        // agregamos un campo 'meta' a las rutas que requieren autenticación
+        meta: { // los campos meta son campos que le podemos agregar a cualquier ruta, para asignarles el valor que querramos
+            requireAuth: true // el usuario va a necesitar estar autenticado para acceder a esta ruta
+        }
     },
     {
         path:'/publicaciones/crear-publicacion', 

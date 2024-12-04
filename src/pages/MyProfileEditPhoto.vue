@@ -29,6 +29,7 @@ async function handleSubmit() {
 }
 
 async function handleFileSelection(ev) {
+    successMessage.value = ""
     /*
     Nuestro objetivo acá es obtener la imagen que el usuario seleccionó, guardarla e editDate, y leerla para aramar el preview
     Para obtener la imagen, necesitamos pedírsela al <input>
@@ -73,8 +74,9 @@ async function handleFileSelection(ev) {
 <template>
     <BaseHeading>Editar mi foto de Perfil</BaseHeading>
 
-    <div class="flex flex-row gap-6 items-start max-w-4xl m-auto bg-white p-8 rounded-lg shadow-lg border border-slate-300 my-8">
-        <form class="w-1/2"
+    <div class="flex md:flex-row gap-6 md:items-start max-w-4xl m-auto bg-white p-8 rounded-lg shadow-lg border border-slate-300 my-8 flex-col items-center">
+        <form 
+            class="w-1/2"
             action="#"
             @submit.prevent=handleSubmit
         >
@@ -90,7 +92,7 @@ async function handleFileSelection(ev) {
         </div>
 
         
-        <button class="w-2/4 bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 transition-colors duration-200">{{ !loading ? 'Actualizar Foto' : 'Enviando...'}}</button>
+        <button class="w-2/4 min-w-48 bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 focus:bg-slate-700 transition-colors duration-200">{{ !loading ? 'Actualizar Foto' : 'Enviando...'}}</button>
 
         <!-- Mensaje de éxito -->
         <div v-if="successMessage" class="text-green-600 font-medium mt-4">
@@ -104,7 +106,7 @@ async function handleFileSelection(ev) {
                 <img 
                     v-if="editData.photoPreview" 
                     :src="editData.photoPreview" 
-                    class="w-64 h-64 rounded-md"
+                    class="w-64 h-64 object-cover rounded-md"
                 >
             </div>
         </div>

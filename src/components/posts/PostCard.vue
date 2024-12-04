@@ -50,7 +50,7 @@ async function handleComment (postId, user_comment )
 </script>
 
 <template>
-    <article class="w-2/4 border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8">
+    <article class="w-2/4 border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8 min-w-[740px]">
         <div class="mb-3 flex items-center justify-between">
             <div>
                 <h3 class="text-2xl font-semibold text-slate-800">{{ post.book_title }}</h3>
