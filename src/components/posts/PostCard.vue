@@ -73,16 +73,26 @@ async function handleComment (postId, user_comment )
             </div>
         </div>
 
-        <div class="whitespace-pre-wrap break-words font-sans text-base mb-5 p-5 border-b-2">
-            {{ post.review }}
+        <div class="h-max">
+            <div class="mb-5">
+                <img 
+                    src="/imgs/img_referencia_archivo.jpg" 
+                    :alt="`Imagen referencia del libro ${post.book_title} subida por ${post.user_name}`"
+                    class="w-full h-auto rounded-md shadow-md object-cover max-h-[500px]"
+                >
+            </div>
+    
+            <div class="whitespace-pre-wrap font-sans mb-5 p-5 border-b-2">
+                {{ post.review }}
+            </div>
         </div>
 
         <!-- Comentarios -->
         <div class="mb-5">
-            <h4 class="font-semibold text-base text-slate-800 mb-1 ml-4">Comentarios:</h4>
+            <h4 class="text-lg font-semibold text-slate-800 mb-1 ml-4">Comentarios:</h4>
             <ul class="max-h-40 overflow-y-auto border border-slate-200 px-4 rounded-md">
-                <p v-if="post.comments.length == 0" class="text-slate-600 text-sm mt-2">No existen comentarios en la publicación todavía...</p>
-                <li v-for="comment in post.comments || []" :key="comment.id" class="text-slate-600 text-sm my-2">
+                <p v-if="post.comments.length == 0" class="text-slate-600 text-sm my-3">No existen comentarios en la publicación todavía...</p>
+                <li v-for="comment in post.comments || []" :key="comment.id" class="text-slate-600 text-sm my-3">
                     <router-link
                         :to="`/usuario/${comment.comment_user_id}`"
                     >

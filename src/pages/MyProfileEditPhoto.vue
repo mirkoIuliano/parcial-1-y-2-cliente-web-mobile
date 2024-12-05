@@ -23,6 +23,7 @@ async function handleSubmit() {
         await editMyProfilePhoto(editData.value.photo)
     } catch (error) {
         // TODO
+        console.error("Ocurrió un error al intentar editar perfil: ", error)
     }
 
     successMessage.value = "¡Se actaulizó la foto de perfil con éxito!"

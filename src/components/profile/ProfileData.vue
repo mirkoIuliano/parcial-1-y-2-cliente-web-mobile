@@ -17,7 +17,7 @@ defineProps({
 <template>
     <div class="m-auto max-w-96">
         <div class="flex justify-center my-2">
-            <img 
+            <img
                 :src="user.photoURL || NoPhoto" 
                 class="w-64 h-64 object-cover border rounded-full"
             >
@@ -32,8 +32,5 @@ defineProps({
             <p class="mb-1 text-cyan-800 font-medium">{{ user.email }}</p>
             <p class="mb-1">{{ user.bio || "" }}</p>
         </div>
-    </div>
-
-    <div class="flex gap-4 items-start">
     </div>
 </template>
