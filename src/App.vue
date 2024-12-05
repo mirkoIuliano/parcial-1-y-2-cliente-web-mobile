@@ -31,7 +31,7 @@ function handleLogout(){
         <router-link to="/">
             <div class="flex items-center">
                 <div>
-                    <img :src="Logo" alt="Logo" class="min-w-10 min-h-10 mr-2">
+                    <img :src="Logo" alt="Logo de Coppermind" class="min-w-10 min-h-10 mr-2">
                 </div>
                 <div>
                     <h1 class="text-2xl font-semibold"> Coppermind </h1>

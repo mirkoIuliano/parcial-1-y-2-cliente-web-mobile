@@ -19,6 +19,7 @@ defineProps({
         <div class="flex justify-center my-2">
             <img
                 :src="user.photoURL || NoPhoto" 
+                :alt="`Foto de perfil de ${user.displayName}`"
                 class="w-64 h-64 object-cover border rounded-full"
             >
             <!-- En vez de usar como componente (NoPhoto) podemos llamar a la foto directamente así:
