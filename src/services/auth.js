@@ -1,9 +1,9 @@
 // este archivo se encarga de la autenticación al iniciar sesión
 
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
-import { auth } from "./firebase";
-import { createUserProfile, getUserProfileByID, updateUserProfile } from "./user-profile";
-import { getFileURL, uploadFile } from "./file-storage";
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth"
+import { auth } from "./firebase"
+import { createUserProfile, getUserProfileByID, updateUserProfile } from "./user-profile"
+import { getFileURL, uploadFile } from "./file-storage"
 
 // Creamos una variable donde vamos a tenre los datos del usuario autenticado (si es que existe)
 let loggedUser = {

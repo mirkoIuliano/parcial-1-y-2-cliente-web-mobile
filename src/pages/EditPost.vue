@@ -4,6 +4,7 @@ import BaseHeading from '../components/BaseHeading.vue'
 import { useLoggedUser } from '../compossables/useLoggedUser'
 import { useRoute, useRouter } from 'vue-router'
 import { getPostById, editMyPost } from '../services/public-posts'
+import NoPhoto from '/imgs/no-photo.png'
 
 // creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser()
 const { loggedUser } = useLoggedUser()
@@ -22,6 +23,7 @@ const postId = route.params.id
 const editPost = ref({
     book_title: "Cargando el titutlo del libro...",
     review: "Cargando reseña...",
+    post_image: null,
 })
 
 // el mensaje de error va a estar en la siguiente variable
@@ -43,6 +45,11 @@ onMounted(async () => {
     // editPost.value ahora va a tener los datos del post que acabo de traer
     editPost.value = post
 })
+
+function handleFileSelection(ev){
+    // guardamos en post_image el archivo seleccionado
+    editPost.value.post_image = ev.target.files[0]
+}
 
 const handleSubmit = async () => {
 
@@ -72,6 +79,7 @@ const handleSubmit = async () => {
     if (editPost.value.review.length > 2000) {
         return errorMessage.value = "La reseña puede tener como máximo 2000 caracteres"
     }
+    // TODO: validaciones de archivo (que sea imagen, cuan pesado es, etc)
     /*---------- Fin de validaciones ----------*/
 
     // Preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
@@ -83,16 +91,17 @@ const handleSubmit = async () => {
         await editMyPost(postId, {
             book_title: editPost.value.book_title,
             review: editPost.value.review,
+            new_image: editPost.value.post_image,
+            post_imageURL: editPost.value.post_imageURL,
         }) // llamamos a la función editPost y le pasamos un objeto con la copia de los datos que queremos editar
+        successMessage.value = "¡La publicación fue actualizada con éxito!"
+        errorMessage.value = ""
     } catch (error) {
         console.error("Ocurrió un error al intentar editar el posteo", error)
     }
-
-    successMessage.value = "¡La publicación fue actualizada con éxito!"
-    errorMessage.value = ""
+    
     // cuando termine ponemos el loading en false de vuelta
     loading.value = false
-
 
 }
 
@@ -117,6 +126,25 @@ const handleSubmit = async () => {
                 class="px-4 py-2 border border-slate-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                 placeholder="Escribe el título del libro que deseas reseñar"
                 v-model="editPost.book_title"
+            >
+        </div>
+
+        <div class="mb-5">
+            <p class="block mb-2 text-lg font-semibold text-slate-700">Imagen actual</p>
+            <div class="mb-5">
+                <img
+                    :src="editPost.post_imageURL || NoPhoto"
+                    :alt="`Imagen referencia del libro ${editPost.book_title}`"
+                    class="w-full h-auto rounded-md shadow-md object-cover max-h-[500px]"
+                />
+            </div>
+            
+            <label for="post_image" class="block mb-2 text-lg font-semibold text-slate-700">Cambiar imagen de referencia del libro (opcional)</label>
+            <input 
+                type="file"
+                id="post_image" 
+                class="block w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" 
+                @change="handleFileSelection"
             >
         </div>
 

@@ -2,6 +2,7 @@ import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, s
 import { db } from "./firebase" // importamos la variable db que creamos en firebase. Esta es la referencia a la base y la necesitamos para poder escribir o leer datos de la base 
 import { auth } from "./firebase"
 import { getDisplayNameByUserId } from "./user-profile"
+import { getFileURL, uploadFile } from "./file-storage"
 
 
 /**
@@ -12,20 +13,33 @@ import { getDisplayNameByUserId } from "./user-profile"
  * 
  */
 // Función para guardar posteos nuevos
-export async function savePulicPost({book_title, review}) 
+export async function savePulicPost({book_title, review, post_image}) 
 {
     // Obtenemos al usuario autenticado
     const user = auth.currentUser
+
     // Validamos de que exista tal usuario
     if (!user) {
-        console.error("[public-posts.js savePublicPost] No hay un usuario autenticado. ", error)
-        throw error
+        throw new Error("[public-posts.js savePublicPost] No hay un usuario autenticado")
     }
     
     // Escribimos en Firestore
     // Para interactuar con una collection o document de Firestore es necesario definir una referencia a dicha collection o document
     // Para definir una referencia a una collection usamos la función "collection()"
     const publicPostsCollectionRef = collection(db, 'public-posts') // collection() recibe dos parámetros: la conexión a la base (db) y el nombre/ruta de la collection
+
+    // defino la variable imageURL y la inicializo como null (por defecto tomo que no hay foto en el posteo)
+    let imageURL = null
+
+    // si el usuario envió una imagen se hace lo siguiente
+    if (post_image) {
+        // creo el path que va a tener el lugar donde se va a guardar la imagen
+        const filepath = `public-posts/${user.uid}/${book_title}`
+        // con la función uploadFile() de [file-storage] subimos la imagen a Storage
+        await uploadFile(filepath, post_image)
+        // con la función getFileURL de [file-storage] obtenemos la URL de la imagen y la guardamos en imageURL
+        imageURL = await getFileURL(filepath)
+    }
     
     // Para agregar un docuemnto a una collection, usamos la función addDoc(), que recibe 2 arguemntos:
     // 1. La referencia de la collection    2. Un objeto con los datos que queremos agregar en ek documento
@@ -35,20 +49,30 @@ export async function savePulicPost({book_title, review})
             user_id: user.uid, // pasamos el id del usuario
             book_title,
             review,
+            post_imageURL: imageURL,
             created_at: serverTimestamp(), 
             // usamos la función serverTimestamp para guardar la fecha de creación. Esta función deja indicado que queremos que cuando el registro se grabe en el servidor, se tome la fecha y la hora del servidor 
         }
     ) 
 }
 
-// Función para obtener los posteos de la base de datos
+// Función para obtener los posteos de la base de datos (antes lo hice con onSnapshot, pero me di cuenta que se gastan demasiados recursos y ninguna red social funciona de esta manera -> se actualizan cuadno refresheas la página)
 export async function getPublicPosts() {
+
+    // primero creamos la referencia a la collection public-posts (donde están todas las publicaciones)
     const publicPostsCollectionRef = collection(db, "public-posts")
+
+    // creo una query (consulta) para traer todos los posteos ordenados por fecha de creación de manera descendente (quiero que aparezcan arriba lo más nuevos)
     const postsQuery = query(publicPostsCollectionRef, orderBy("created_at", "desc"))
 
+    // uso getDocs para traer todos los docuemnts de la collection. getDocs resulta en un objeto QuerySnapshot que tiene información general sobre la consulta y los docuemntos. Todo esto lo guardo en 'snapshot' 
     const snapshot = await getDocs(postsQuery)
+
+    // creo posts y en él voy a poner todos los documentos separados y con el displayName dinámico 
     const posts = await Promise.all(
+        // snapshot.docs => de esta forma entro al array con los docuemtnos     // snapshot.docs.map => hago un map para ir documento por docuemento y realizarle el cambio del user_name con displayName 
         snapshot.docs.map(async (doc) => {
+            // en displayName voy a guardar el displayName que tiene el user
             const displayName = await getDisplayNameByUserId(doc.data().user_id)
             return {
                 id: doc.id,
@@ -57,6 +81,7 @@ export async function getPublicPosts() {
                 book_title: doc.data().book_title || "",
                 review: doc.data().review || "",
                 created_at: doc.data().created_at?.toDate(),
+                post_imageURL: doc.data().post_imageURL || null,
                 comments: [], // se inicializa vacío y después se "rellena" con subscribeToComments()
                 commentsModel: { user_comment: "" },
             }
@@ -148,6 +173,7 @@ export async function getPostsByUserId(userId) {
                 book_title: doc.data().book_title || "",
                 review: doc.data().review || "",
                 created_at: doc.data().created_at?.toDate(),
+                post_imageURL: doc.data().post_imageURL || null, 
                 comments: [], // se inicializa vacío y después se "rellena" con subscribeToComments()
                 commentsModel: { user_comment: "" },
             }
@@ -155,7 +181,6 @@ export async function getPostsByUserId(userId) {
     )
 
     return posts
-
 }
 
 // Función para traer un docuemnto específico
@@ -181,19 +206,35 @@ export async function getPostById(postId) {
         book_title: post.data().book_title || "",
         review: post.data().review || "",
         created_at: post.data().created_at?.toDate(),
+        post_imageURL: post.data().post_imageURL || null, 
         // no retorno nada sobre los comentarios ya que no veo necesario que tenga sección de comentarios en un edit del posteo (quizá en un futuro estaría bueno ampliar esto para que pueda eliminar comentarios de otros usuarios??)
     }
 }
 
 // Función para editar un docuemtno
 export async function editMyPost(postId, updatedData) {
+
     // Creamos la referencia al documento específico en la colección 'public-posts'
     const postDocRef = doc(db, "public-posts", postId)
+
+    // Creamos una variable imageURL para que se guarde aquí la URL de la foto antigua o que sea null en caso de no haber
+    let imageURL = updatedData.post_imageURL || null
+
+    // hacemos la validación de si se cargó una imagen nueva y si es una nueva la actualizamos
+    if (updatedData.new_image) {
+        // creo el path que va a tener el lugar donde se va a guardar la imagen (ponemos el mismo path que la anterior para que se sobreescriba)
+        const filepath = `public-posts/${auth.currentUser.uid}/${updatedData.book_title}`
+        // con la función uploadFile() de [file-storage] subimos la imagen nueva a Storage
+        await uploadFile(filepath, updatedData.new_image)
+        // con la función getFileURL de [file-storage] obtenemos la nueva URL de la imagen y la guardamos en imageURL
+        imageURL = await getFileURL(filepath)
+    }
 
     // Editamos/actualizamos el documento usando la función updateDoc()
     await updateDoc(postDocRef, // como primer parámetro le pasamos la referencia al documento específico
     { // como segundo parámetro le pasamos un objeto con los datos a actualizar 
         book_title: updatedData.book_title,
         review: updatedData.review,
+        post_imageURL: imageURL,
     })
 }

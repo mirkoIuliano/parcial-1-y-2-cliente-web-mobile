@@ -47,7 +47,7 @@ async function handleFileSelection(ev) {
     Como nosotros sabemos que nuestro input no tiene la propiedad "multiple", solo puede contener un único arhcivo. Por lo que podemos hard-codear el [0]
     editData.value.photo = ev.target.files[0];
     */
-    editData.value.photo = ev.target.files[0];
+    editData.value.photo = ev.target.files[0]
     // console.log("Archivo", editData.value.photo)
 
     // Ahora que contamos con el File, vamos a leerlo para poder hacer la previsualización

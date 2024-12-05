@@ -10,10 +10,17 @@ const router = useRouter()
 const newPost = ref({
     book_title: '',
     review: '',
+    post_image: null,
 })
 
 // el mensaje de error va a estar en la siguiente variable
 const errorMessage = ref('')
+
+
+function handleFileSelection(ev){
+    // guardamos en post_image el archivo seleccionado
+    newPost.value.post_image = ev.target.files[0]
+}
 
 function handleSubmit(){
 
@@ -41,6 +48,7 @@ function handleSubmit(){
     if (newPost.value.review.length > 2000) {
         return errorMessage.value = "La reseña puede tener como máximo 2000 caracteres"
     }
+    // TODO: validaciones de archivo (que sea imagen, cuan pesado es, etc)
     /*---------- Fin de validaciones ----------*/
 
     console.log("Se envió el formulario de posteo nuevo")
@@ -63,9 +71,9 @@ function handleSubmit(){
 <template>
     <BaseHeading>Nuevo Posteo</BaseHeading>
     <form 
-    action="#" 
-    @submit.prevent="handleSubmit"
-    class="w-2/4 min-w-[500px] border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8"
+        action="#" 
+        @submit.prevent="handleSubmit"
+        class="w-2/4 min-w-[500px] border border-slate-300 p-8 rounded-lg shadow-lg bg-white m-auto my-8"
     >
 
         <div class="mb-5">
@@ -76,6 +84,16 @@ function handleSubmit(){
                 class="px-4 py-2 border border-slate-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                 placeholder="Escribe el título del libro que deseas reseñar"
                 v-model="newPost.book_title"
+            >
+        </div>
+
+        <div class="mb-5">
+            <label for="post_image" class="block mb-2 text-lg font-semibold text-slate-700">Imagen de referencia del libro (opcional)</label>
+            <input 
+                type="file"
+                id="post_image" 
+                class="block w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" 
+                @change="handleFileSelection"
             >
         </div>
 

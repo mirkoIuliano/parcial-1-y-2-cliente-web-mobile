@@ -74,9 +74,9 @@ async function handleComment (postId, user_comment )
         </div>
 
         <div class="h-max">
-            <div class="mb-5">
+            <div class="mb-5" v-if="post.post_imageURL">
                 <img 
-                    src="/imgs/img_referencia_archivo.jpg" 
+                    :src="post.post_imageURL" 
                     :alt="`Imagen referencia del libro ${post.book_title} subida por ${post.user_name}`"
                     class="w-full h-auto rounded-md shadow-md object-cover max-h-[500px]"
                 >
