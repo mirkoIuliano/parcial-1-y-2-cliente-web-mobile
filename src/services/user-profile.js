@@ -69,7 +69,7 @@ export async function createUserProfile(id, {email}) {
  * Función para obtener el displayName de un usuario por su uid. Sirve para poder poner los user_name de manera dinámica, cosa que si el usuario lo actualiza, se va a cambiar también en los posts y comentarios que haya realizado
  * 
  * @param {string} uid 
- * @returns 
+ *
  */
 export async function getDisplayNameByUserId(uid) {
 
