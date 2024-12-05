@@ -18,9 +18,21 @@ service cloud.firestore {
       allow create: if 
       	request.auth != null &&
         // acá verificamos que sea el mismo que firma el posteo
-        request.auth.uid == request.resource.data.user_id 
+        request.auth.uid == request.resource.data.user_id;
       allow update: if
-      	request.auth != null
+      	request.auth != null &&
+       	request.auth.uid == resource.data.user_id; // solo puede actualizar la
+				// publicación el que creó la publicación 
+
+		// Reglas para los comentarios dentro de la subcolección "comments"
+		// Para leer: solo usuarios autenticados
+		// Para crear: solo usuarios autenticados y que sea el mismo que firma
+      match /comments/{comment} {
+        allow read: if request.auth != null;
+        allow create: if 
+          request.auth != null &&
+          request.auth.uid == request.resource.data.comment_user_id;
+      }
     }
     
     // Reglas para el perfil de usuarios
@@ -38,7 +50,7 @@ service cloud.firestore {
         // verificamos que el uid del usuario autenticado sea igual al 
         // user (los document de la collection 'users' tienen como 
         // id, el uid del usuario del cual contienen los datos)
-        request.auth.uid == user // 'user' viene del {user} 
+        request.auth.uid == user; // 'user' viene del {user} 
         												 // de match /users/{user}
     }
     
@@ -74,11 +86,5 @@ service cloud.firestore {
           request.auth.uid == request.resource.data.user_id;
       }
     }
-    // Para la regla de los mensajes de chat, como los mensajes son
-    // una subcolección hay 2 maneras en las que las puedo definir
-    // 1. Creando otro match así:
-    // match /private-chats/{chat}/messages/{message} {}
-    // 2. Otra es dentro del match /private-chats/{chat} añadir dentro
-    // match /private-chats/{chat} y así anidarlo
   }
 }

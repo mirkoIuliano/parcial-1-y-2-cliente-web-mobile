@@ -68,11 +68,12 @@ export async function getPublicPosts() {
     // uso getDocs para traer todos los docuemnts de la collection. getDocs resulta en un objeto QuerySnapshot que tiene información general sobre la consulta y los docuemntos. Todo esto lo guardo en 'snapshot' 
     const snapshot = await getDocs(postsQuery)
 
-    // creo posts y en él voy a poner todos los documentos separados y con el displayName dinámico 
+    // creo posts y en él voy a poner todos los documentos separados y con el user_name dinámico 
     const posts = await Promise.all(
-        // snapshot.docs => de esta forma entro al array con los docuemtnos     // snapshot.docs.map => hago un map para ir documento por docuemento y realizarle el cambio del user_name con displayName 
+        // snapshot.docs => de esta forma entro al array con los docuemtnos
+        // snapshot.docs.map => hago un map para ir documento por docuemento y realizarle el cambio del user_name con displayName 
         snapshot.docs.map(async (doc) => {
-            // en displayName voy a guardar el displayName que tiene el user
+            // en displayName voy a guardar el displayName que tiene el user actualmente
             const displayName = await getDisplayNameByUserId(doc.data().user_id)
             return {
                 id: doc.id,
@@ -156,6 +157,7 @@ export async function getPostsByUserId(userId) {
         console.error("no se envió ningún Id de usuario para buscar sus publicaciones")
     }
 
+    // uso getDocs para traer todos los docuemnts de la collection. getDocs resulta en un objeto QuerySnapshot que tiene información general sobre la consulta y los docuemntos. Todo esto lo guardo en 'postsSnapshot' 
     const postsSnapshot = await getDocs(userPostsQuery)
     
     if (postsSnapshot.docs.length == 0) {
@@ -163,8 +165,12 @@ export async function getPostsByUserId(userId) {
         return null
     }
 
+    // creo posts y en él voy a poner todos los documentos separados y con el user_name dinámico 
     const posts = await Promise.all(
+        // postsSnapshot.docs => de esta forma entro al array con los docuemtnos
+        // postsSnapshot.docs.map => hago un map para ir documento por docuemento y realizarle el cambio del user_name con displayName 
         postsSnapshot.docs.map(async (doc) => {
+            // en displayName voy a guardar el displayName que tiene el user actualmente
             const displayName = await getDisplayNameByUserId(doc.data().user_id)
             return {
                 id: doc.id,

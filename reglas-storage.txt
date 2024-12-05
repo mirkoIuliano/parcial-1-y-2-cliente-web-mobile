@@ -2,13 +2,21 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /{allPaths=**} {
-      allow read: if request.auth != null // esto permite leer clqr archivo
+      allow read: if request.auth != null; // esto permite leer clqr archivo
     }
     
+    // Reglas para fotos de perfil
     match /users/{user}/{file} {
     	allow create, update: if 
       	request.auth != null &&
         request.auth.uid == user; // con esto verificamos que el usuario esté modificando la carpeta que le corresponde
+    }
+    
+    // Reglas para imagenes de publicaciones
+    match /public-posts/{userId}/{file} {
+    	allow create, update: if 
+      	request.auth != null &&
+        request.auth.uid == userId; // con esto verificamos que el usuario esté modificando la carpeta que le corresponde
     }
   }
 }
