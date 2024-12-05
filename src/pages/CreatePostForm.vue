@@ -19,7 +19,7 @@ function handleSubmit(){
 
     /*---------- Validaciones ----------*/
     if (newPost.value.book_title.length == 0) {
-        return errorMessage.value = "Es obligatorio poner un título al posteo"
+        return errorMessage.value = "Es obligatorio poner el título del libro"
     }
 
     if (newPost.value.book_title.length < 5) {

@@ -20,8 +20,8 @@ const route = useRoute()
 const postId = route.params.id
 
 const editPost = ref({
-    book_title: "Cargando titutlo anterior...",
-    review: "Cargando reseña anterior...",
+    book_title: "Cargando el titutlo del libro...",
+    review: "Cargando reseña...",
 })
 
 // el mensaje de error va a estar en la siguiente variable
@@ -50,7 +50,7 @@ const handleSubmit = async () => {
 
     /*---------- Validaciones ----------*/
     if (editPost.value.book_title.length == 0) {
-        return errorMessage.value = "Es obligatorio poner un título al posteo"
+        return errorMessage.value = "Es obligatorio poner el título del libro"
     }
 
     if (editPost.value.book_title.length < 5) {
