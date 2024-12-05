@@ -79,10 +79,10 @@ async function handleComment (postId, user_comment )
 
         <!-- Comentarios -->
         <div class="mb-5">
-            <h4 class="font-semibold text-base text-slate-800">Comentarios:</h4>
-            <ul>
+            <h4 class="font-semibold text-base text-slate-800 mb-1 ml-4">Comentarios:</h4>
+            <ul class="max-h-40 overflow-y-auto border border-slate-200 px-4 rounded-md">
                 <p v-if="post.comments.length == 0" class="text-slate-600 text-sm mt-2">No existen comentarios en la publicación todavía...</p>
-                <li v-for="comment in post.comments || []" :key="comment.id" class="text-slate-600 text-sm mt-2">
+                <li v-for="comment in post.comments || []" :key="comment.id" class="text-slate-600 text-sm my-2">
                     <router-link
                         :to="`/usuario/${comment.comment_user_id}`"
                     >
