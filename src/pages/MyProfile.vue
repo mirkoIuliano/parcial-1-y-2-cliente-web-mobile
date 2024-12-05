@@ -10,7 +10,7 @@ import NoPostsYet from '/imgs/no-posts-yet.png'
 // creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 
 const { loggedUser } = useLoggedUser()
 
-const loading = ref(true)
+const loading = ref(false)
 
 const posts = ref([])
 
@@ -20,6 +20,11 @@ onMounted(async () => {
 
     // traemos todos los posteos del usuario con getPostsByUserId
     posts.value = await getPostsByUserId(loggedUser.value.id) // guardamos en el el array posts[] todas las publicaciones del usuario
+
+    if (posts.value == null) {
+        loading.value = false
+        return console.log("no tiene posteos")
+    }
 
     // recorremos el array posts con un forEach
     posts.value.forEach((post) => {  
@@ -60,8 +65,8 @@ onMounted(async () => {
 
     <p v-if="loading" class="text-2xl text-slate-700 text-center mt-14">Cargando posteos...</p>
 
-    <article class="flex items-center justify-center mb-12">
-        <div v-if="posts.length === 0 && !loading" class="flex flex-col items-center gap-8 mb-8">
+    <article v-if="posts === null && !loading" class="flex items-center justify-center mb-12">
+        <div class="flex flex-col items-center gap-8 mb-8">
             <p class="text-center text-slate-500 text-2xl">Todavía no existen posteos...</p>
             <div>
                 <img :src="NoPostsYet" class="w-60 h-60">
