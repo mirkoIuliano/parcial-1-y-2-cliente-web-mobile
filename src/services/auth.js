@@ -188,55 +188,6 @@ export async function logout() {
     await signOut(auth)
 }
 
-/*--------------------------------------------------------------------------------
-| Patrón de Diseño: Observar
-+---------------------------------------------------------------------------------
-| Un patrón es algo que se repite.
-| Un patrón de diseño es una solución común de aplicar a un determinado problema.
-| Muchos de estos ya están "identificados" y se les asignaron un nombre.
-+---------------------------------------------------------------------------------
-| En esta ocsción  vamos a presentar el ptarón 'Observer'.
-| Observer sirve para definir una relación de 1 a muchos, entre elementos del 
-| sistema. 
-| Por un lado, tenemos un elemento llamado el "subject" (sujeto), y por otro lado
-| tenemos otros elementos llamados "observers" (obeservadores). Observers serían
-| los muchos y el subject el 1.
-| La idea es que los observers son elementos que están interesados en ser 
-| notificados de cambios o sucesos ocurridos en el subject. Depende de qué sea el
-| subject, estos pueden ser acontecimientos en el cilco de vida del sujeto o en
-| cambios de sus valores.
-|
-| La idea de la implementación que vamos a aplicar es que el subject maneje la 
-| mayor parte (generalmente en "observer" la mayor parte del trabajo del patrón 
-| está resuelta por el sujeto; los observers son los que sacan provecho de esto 
-| mayormente).
-| El subject va a permitir, a través de una función, que los observers puedan
-| "suscribirse" para recibir notificaciones, en nuestro caso, de los cambios en  
-| la variable del usuario autenticado.
-| Estos observers van a ser guardados en un array.
-| Cada vez que se realice algún cambio en los datos de loggedUser, vamos a pedir 
-| que se notifique a todos los observers suscritos.
-| 
-| Nota: Si bien el término más común para agregar un observer es "subscribe",  
-| algunas implementaciones lo llaman "attach" o "listen".
-| Esto sería un obsrever ===> elementHTML.addEventListener('click', function(){})
-| 
-| Clase 8 min 15 habla sobre las "memory leaks" y min 20 s/ esto de los observers
-| Es crucial que los observers tengan un mecanismo para cancelar su suscripción.
-| Si no hacemos esto se va a agregar un nuevo observer arriba del otro y vamos a
-| ir acumulando muchísimos hasta poder llegar a colapsar la memoria de la PC.
-| 
-| 
-| 
-+--------------------------------------------------------------------------------*/
-/*
-Este patrón permite que partes de la aplicación "escuchen" cambios en los datos del usuario autenticado (loggedUser).
-¿Cómo funciona?
-Los "observers" son funciones que se ejecutan automáticamente cuando loggedUser cambia
-Cada vez que se actualiza loggedUser, notificas a todos los observers
-Ejemplo: Si loggedUser cambia (como al iniciar sesión), se puede actualizar la interfaz automáticamente
-*/
-// Vamos a crear 3 funciones que vamos a usar para implementar el observer:
 /**
  * 
  * @param {Function} callback 
@@ -248,7 +199,7 @@ export function subscribeToAuthChanges(callback){
 
     // console.log("Observer agregado. El stack actual es: ", observers)
 
-    //Inmediatamente notificamos al callback los datos actuales del usuario autenticado 
+    // inmediatamente notificamos al callback los datos actuales del usuario autenticado 
     notify(callback)
 
     // Retornamos una nueva función, que al ejecturase elimine este observer que acaba de agregar

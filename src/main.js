@@ -1,7 +1,7 @@
-import './style.css';
+import './style.css'
 import App from './App.vue' // importamos el componente App, que es el compoentne que queremos usar como componente raíz
-import { createApp } from 'vue'; // importamos la función createApp para poder crear la aplicación
-import router from './router/router';
+import { createApp } from 'vue' // importamos la función createApp para poder crear la aplicación
+import router from './router/router'
 
 const app = createApp(App) // con esta función creamos la aplicación. Pero la crea en memoria nada más, no la vamos a ver reflejada en ningún lado todavía
 // para verla reflejada tenemos que decirle a Vue dónde queremos que monte esta aplciación
