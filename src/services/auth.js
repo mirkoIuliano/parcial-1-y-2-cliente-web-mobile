@@ -16,45 +16,32 @@ let loggedUser = {
 }
 
 // A penas se levanta la página preguntamos si el usuario figura como autenticado, en cuyo caso levantamos los datos
-if(localStorage.getItem('user')) // Si en localStorage tenemos el dato 'user'
+if(localStorage.getItem('user')) // si en localStorage tenemos el dato 'user' hacemos lo siguiente:
 {
-    // vamos a hacer que loggedUser sea igual a un JSON.parse de los datos que están en localStorage, 'user'
+    // Vamos a hacer que loggedUser sea igual a un JSON.parse de los datos que están en localStorage, 'user'
     loggedUser = JSON.parse(localStorage.getItem('user'))
 }
 
 // Definimos un array de observers
 let observers = []
 
-
 // Nos "suscribimos" a los cambios de la autenticación con onAuthStateChanged()
-/* 
-Cuando la página carga, onAuthStateChanged() revisa si hay un usuario autenticado y "escucha" cambios en el estado de autenticación
-Si el usuario inicia/cierra sesión, esta función:
-    - Actualiza los datos locales (loggedUser) con la información del usuario o los reinicia a null
-    - Busca información adicional del perfil (como biografía o carrera) en Firestore, si el usuario está autenticado
-    - Notifica a los observers
-*/
-/* 
-Dato: onAuthStateChanged() queda "suelto" en la raíz del proyecto y esto hace que cada vez que alguien importe este archivo [auth.js] se ejecuta automáticamente onAuthStateChanged()
-    Tan pronto alguien importa este módulo para usar cualquiera de sus funciones, ya le dejamos especificado que vamos a necesitar suscribirnos a la autenticación de Firebase
-    Clase 7 (27 de sep), min 36:00 dijo esto 
-*/
 onAuthStateChanged // onAuthStateChanged() recibe un callback como parámetro, que se ejecuta cada vez que haya un cambio en el estado de autenticación (si se inicia o cierra sesion)
 (
     auth, // el primer parámetro es la referencia a Authentication 
     async user => { // el segundo parámetro es el callback que se va a ejecutar cada vez que ocurra un cambio en el estado de autenticación
         /*
         El callback que se le pasa a onAuthStateChanged() se ejecuta cada vez que ocurre un cambio en el estado de autenticación
-            - Si un usuario está autenticado, el callback recibe como argumento un objeto {user} con la información del usuario (uid, email, etc.).
+            - Si un usuario está autenticado, el callback recibe como argumento un objeto {user} con la información del usuario (uid, email, etc.)
             - Si no hay un usuario autenticado, el callback recibe null
         */
         if(user) {
             // si existe user, seteamos los valores de loggedUser con los datos del usuario
-            console.log("Confirmando que el usuario está autenticado")
+            // console.log("Confirmando que el usuario está autenticado")
 
             // Actualizamos los datos locales de loggedUser, notificamos a los observers y guardamos los cambios del user en localStorage con la función updateLoggedUser()
             updateLoggedUser ({ // le pasamos como parámetro un objeto con los datos del usuario autenticado
-                id: user.uid, //  En el usuario de Firebase Authentication, el id se llama 'uid' (unique id)
+                id: user.uid, //  en el usuario de Firebase Authentication, el id se llama 'uid' (unique id)
                 email: user.email, 
                 displayName: user.displayName, 
                 photoURL: user.photoURL,
@@ -64,6 +51,7 @@ onAuthStateChanged // onAuthStateChanged() recibe un callback como parámetro, q
             // usamos getUserProfileByID() de [user-profile.js] para obtener estos registros
             getUserProfileByID(user.uid) // le pasamos el id del user, que como se dijo antes, en Firebase Authentication lo encontramos bajo el nombre 'uid'
                 .then(userProfile => { // userProfile es el objeto que recibimos como respuesta de la función getUserProfileByID
+                    
                     // Actualizamos los datos locales de loggedUser, notificamos a los observers y guardamos los cambios del user en localStorage con la función updateLoggedUser()
                     updateLoggedUser ({ // le pasamos como parámetro un objeto con los datos nuevos del usuario
                         bio: userProfile.bio, // le agregamos la bio
@@ -73,7 +61,8 @@ onAuthStateChanged // onAuthStateChanged() recibe un callback como parámetro, q
                 })
 
         } else {
-            // si user no existe, entonces los valores del loggedUser vuelven a ser todos nulos porque significa que no hay un usuario autenticado 
+            
+            // Si user no existe, entonces los valores del loggedUser vuelven a ser todos nulos porque significa que no hay un usuario autenticado 
             updateLoggedUser ({
                 id: null,
                 email: null,
@@ -82,12 +71,14 @@ onAuthStateChanged // onAuthStateChanged() recibe un callback como parámetro, q
                 photoURL: null,
                 fullyLoaded: false,
             }
+
         )
     }
+
 })
 
 
-// creamos la función para iniciar sesión
+// Función para iniciar sesión
 export async function login({email, password}) {
     // Tratamos de autenticar usando la función signInWithEmailAndPassword(), que sirve para iniciar sesión con un email y password
     // Recibe 3 parámetros:
@@ -96,6 +87,7 @@ export async function login({email, password}) {
     // 3. El password
     // Retorna una Promise que se resuelve con UserCredentials, y se rechaza si el login no es exitoso
     try {
+
         const user = await signInWithEmailAndPassword(auth, email, password) 
         console.log("Sesión iniciada con éxito", user)
 
@@ -103,18 +95,21 @@ export async function login({email, password}) {
         console.error("[auth.js login] Error al tratar de iniciar sesión: ", error)
         throw error
     }
+
 }
 
 
-// creamos la función para registrarnos (crear cuenta)
+// Función para registrarnos (crear cuenta)
 export async function register({email, password}) {
+
     try {
+
         // Registrarse en la aplicaicón requiere 2 acciones:
         // 1. Crear el usuario en Authentication
         // 2. Crear un documento en Firestore, en la collection 'users', usando el uid del usuario en Authentication
 
         // Primero nos registramos en Authentication
-        const credentials = await createUserWithEmailAndPassword( // createUserWithEmailAndPassword() es como el signInWithEmailAndPassword
+        const credentials = await createUserWithEmailAndPassword(
             auth, //  le pasamos la referencia al servicio de Authentication
             email, // el email
             password // y el password
@@ -122,6 +117,7 @@ export async function register({email, password}) {
 
         // llamamos a la functión "createUserProfile()" de [user-profile.js] para crear el prefil del usuario en Firestore
         await createUserProfile(credentials.user.uid, {email}) // enviamos 2 argumentos: el uid del user y un objeto con el email ingresado
+
     } catch (error) {
         console.error("[auth.js register] Error al tratar de crear una cuenta: ", error)
         throw error
@@ -130,13 +126,15 @@ export async function register({email, password}) {
 
 
 /**
- * Esta es la función para editar mi perfil y poder ponerle un nombre de usuario y biografía
+ * Función para editar perfil y poder ponerle un nombre de usuario y biografía
  * 
  * @param {{displayName: string, bio: string}} data
  * @returns {Promise<null>} 
  */
 export async function editMyProfile({displayName, bio}) {
+
     try {
+
         // Actualizamos el displayName en Authentication
         const promiseAuth = updateProfile( // updateProfile recibe 2 parámetro: 
             auth.currentUser, // 1. El usuario autenticado
@@ -144,7 +142,6 @@ export async function editMyProfile({displayName, bio}) {
                 displayName
             }
         )
-        // Info: updateProfile() es una función que permite actualizar los datos de un usuario, pero el profe nos mostró (clase 7, min 55) que solo se pueden actulizar dos datos: la foto de perfil y el nombre de usuario
 
         // Actualizamos el perfil del usuario en Firestore con la función 'updateUserProfile()' de [user-profile.js]. Acá vamos a actualzar el document del user que está dentro de la collection 'users'
         const promiseProfile = updateUserProfile( // a updateUserProfile() le tenemos que pasar dos parámetros:
@@ -154,21 +151,12 @@ export async function editMyProfile({displayName, bio}) {
             }
         ) 
 
-        /* CLASE 8 min 50 saca los 'await' que habían en las funciones updateProfile() y updateUserProfile() porque en realidad no nos importa que hagan estas funciones a la vez y además es mejor por cuestiones de rendimietno que se hagan al unísono
-            Lo que pasa es que en MyProfileEdit tenemos una variable 'loading' que nos sirve para indicar cuando se está guardando los datos (sirve más que nada para que se muestre en la interfaz que se están guardando los datos y comunicarselo al usuario)
-            Como sacamos estos await, este 'loading' cambia de estado de true a false de manera inmediata porque las funciones se hacen a la vez y no hay nada a lo que esperar.
-            Para solucionar esto se guradan updateProfile y updateUserProfile en promiseAuth y promiseProfile, que van a capturar las promesas de las dos funciones (ambas promesas retornan funciones)
-        */
         // Esperamos a que ambas promesas se completen, con ayuda de la función Promise.all()
-        await Promise.all( // all() es un método de la clase Promise, que permite recibir un array de promesas y retorna una nueva promesa, que se resuelve cuando todas las promesas que le pasamos se resuelven, y que se rechaza cuando alguna de las promesas que le mandamos se no se cumple
+        await Promise.all( 
             [
                 promiseAuth, promiseProfile
             ]
         )
-        /*  Clase 8min 56:15
-            De esta manera se guardan en paralelo (a la vez se ejecutan las dos funciones) y tenemos el estado de la información de esto que se está procesando
-        */
-
 
         // Actualizamos los datos locales de loggedUser, notificamos a los observers y guardamos los cambios del user en localStorage con la función updateLoggedUser()
         updateLoggedUser ({ // le pasamos como parámetros un objeto con los datos nuevos del usuario
@@ -176,14 +164,13 @@ export async function editMyProfile({displayName, bio}) {
             bio,
         })
 
-
     } catch (error) {
         console.error('[auth.js editMyProfile] Error al tratar de editar el perfil: ', error)
         throw error
     }
 }
 
-// esta es la función para cerrar sesión
+// Función para cerrar sesión
 export async function logout() {
     await signOut(auth)
 }
@@ -191,9 +178,10 @@ export async function logout() {
 /**
  * 
  * @param {Function} callback 
- * @returns {Function} Función para cancelar la suscripción.
+ * @returns {Function} Función para cancelar la suscripción
  */
 export function subscribeToAuthChanges(callback){
+
     // pusheamos la función callback al array observers
     observers.push(callback)
 
@@ -207,6 +195,7 @@ export function subscribeToAuthChanges(callback){
         observers = observers.filter(obs => obs !== callback) /* setea los observers como la lista actual, pero filtrando (osea sacando) todos los que no sean el callback actual */
         // console.log("Observer removido. El stack es: ", observers)
     }  
+
 }
 
 /**
@@ -216,7 +205,7 @@ export function subscribeToAuthChanges(callback){
  */
 function notify(callback){
     // console.log("Notificando a un observer...")
-    callback({...loggedUser}) // Es muy importante que le pasemos una COPIA y no la variable loggedUser en sí, porque si hacemos esto, la estamos pasando por referencia y esto puede abrir problmeas
+    callback({...loggedUser}) // es muy importante que le pasemos una COPIA y no la variable loggedUser en sí, porque si hacemos esto, la estamos pasando por referencia y esto puede abrir problmeas
 }
 
 /**
@@ -236,14 +225,18 @@ function notifyAll(){
  * 
  * @param {{}} newData 
  */
-// creamos una función actualizar los datos locales de loggedUser, notificar a los observers y para actualizar el usuario en localStorage
+// Creamos una función actualizar los datos locales de loggedUser, notificar a los observers y para actualizar el usuario en localStorage
 function updateLoggedUser(newData){
+
     loggedUser = { // a loggedUser le estamos diciendo que:
         ...loggedUser, // sea igual a lo que ya tenía dentro (...loggedUser)
         ...newData // y que le agregue o modifique según lo nuevo que recibió (argumento newData)
     }
+
     localStorage.setItem('user', JSON.stringify(loggedUser)) // acá lo guardamos en localStorage
+
     notifyAll() // acá notificamos a los observers
+
 }
 
 
@@ -251,16 +244,17 @@ function updateLoggedUser(newData){
  * @param {File} photo
  */
 export async function editMyProfilePhoto(photo){
+
     try {
+
         // Generamos la ruta donde queremos guardar el archivo
         // La forma que le vamos a dar es: "users/idDelUsuario/archivo" => osea vamos a crear una carpeta users, dentro de la cual cada usuario va a tener con su id una carpeta y ahí va a guardar el archivo
-        const filepath = `users/${loggedUser.id}/avatar.jpg` // TODO: Manejar otras extensiones
+        const filepath = `users/${loggedUser.id}/avatar.jpg`
 
         await uploadFile(filepath, photo)
 
-        
         // Guardamos la foto
-        // primero traemos la url de la foto
+        // Primero traemos la url de la foto
         const photoURL = await getFileURL(filepath)
         const promiseAuth = updateProfile(auth.currentUser, {photoURL})
         const promiseFirestore = updateUserProfile(loggedUser.id, {photoURL})
@@ -268,8 +262,10 @@ export async function editMyProfilePhoto(photo){
         await Promise.all([promiseAuth, promiseFirestore])
 
         updateLoggedUser({photoURL})
+
     } catch (error) {
         console.error('[auth.js editMyProfilePhoto] Error al tratar de editar la foto de perfil: ', error)
         throw error
     }
+    
 }
