@@ -1,6 +1,4 @@
-/* 
-Este tiene la funcionalidad de hacer una búsqueda de un usuario específico y de tener un estado de carga
-*/
+/* Este tiene la funcionalidad de hacer una búsqueda de un usuario específico y de tener un estado de carga */
 import { onMounted, ref } from "vue"
 import { getUserProfileByID } from "../services/user-profile"
 
@@ -16,7 +14,7 @@ export function useUser(id) { // le tenemos que pasar un id como parámetro
 
     const loading = ref(false)
     onMounted(async () => {
-        // Cuando monte queremos que traiga los datos del usuario
+        // cuando monte queremos que traiga los datos del usuario
 
         loading.value = true
         user.value = await getUserProfileByID(id)

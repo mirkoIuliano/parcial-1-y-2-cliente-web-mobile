@@ -2,7 +2,7 @@
 import BaseHeading from '../components/BaseHeading.vue'
 import { useLoggedUser } from '../compossables/useLoggedUser'
 
-// Creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 
+// creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 
 const { loggedUser } = useLoggedUser()
 
 </script>

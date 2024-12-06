@@ -1,6 +1,3 @@
-<!-- 
-Este es un componente en el que está la foto de perfil del usuario y sus datos
--->
 <script setup>
 import NoPhoto from '/imgs/no-photo.png'
 
@@ -22,11 +19,6 @@ defineProps({
                 :alt="`Foto de perfil de ${user.displayName}`"
                 class="w-64 h-64 object-cover border rounded-full"
             >
-            <!-- En vez de usar como componente (NoPhoto) podemos llamar a la foto directamente así:
-            <img 
-                :src="user.photoURL || '/imgs/no-photo.png'" 
-            >
-            -->
         </div>
         <div>
             <p class="font-bold mb-1 text-xl">{{ user.displayName || "" }}</p>

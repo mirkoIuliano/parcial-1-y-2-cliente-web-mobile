@@ -4,7 +4,7 @@
 * @returns {string} La fecha con formato "DD/MM/AAAA hh:ii". Retorna null si date es null.
 */
 export function formatDate(date){
-    // hacemos esto es null por lo que explica en clase 9 min 27. Básicamente es para solventar un problema de desincronización entre horario de PC y horario del servidor (que es la hora real que se toma)
+    
     if(!date) return null // después cuando subamos un post vamos a poder poner 'Subiendo post...' gracias a esto
 
     // Vamos a formatear la fecha usando la clase Intl.DateTimeFormat() --> es nativo de JS

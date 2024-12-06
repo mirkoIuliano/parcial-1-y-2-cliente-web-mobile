@@ -51,7 +51,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <BaseHeading v-if="loading">Perfil de cargando...</BaseHeading>
+    <p class="text-4xl text-center text-cyan-950 font-bold mb-10 mt-6" v-if="loading">Perfil de cargando...</p>
     <BaseHeading v-else>Perfil de {{ user.displayName || user.email }}</BaseHeading>
     
     <div class="flex flex-col mb-8 border-b-2 w-[80%] m-auto pb-8">

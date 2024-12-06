@@ -14,7 +14,7 @@ const posts = ref([])
 
 const loading = ref(true)
 
-// Cuando se monte el componente leemos los posteos de Firestore
+// cuando se monte el componente leemos los posteos de Firestore
 onMounted( async () => {
     // cuando monte el componente traemos todos los posteos con getPublicPosts() y los guardamos en el array posts
     posts.value = await getPublicPosts()

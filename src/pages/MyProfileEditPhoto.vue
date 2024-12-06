@@ -14,15 +14,15 @@ const loading = ref(false)
 const successMessage = ref("")
 
 async function handleSubmit() {
-    // Preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
-    if(loading.value) return; // Si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
+    
+    // preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
+    if(loading.value) return // si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
 
     loading.value = true
 
     try {
         await editMyProfilePhoto(editData.value.photo)
     } catch (error) {
-        // TODO
         console.error("Ocurrió un error al intentar editar perfil: ", error)
     }
 
@@ -32,21 +32,7 @@ async function handleSubmit() {
 
 async function handleFileSelection(ev) {
     successMessage.value = ""
-    /*
-    Nuestro objetivo acá es obtener la imagen que el usuario seleccionó, guardarla e editDate, y leerla para aramar el preview
-    Para obtener la imagen, necesitamos pedírsela al <input>
-    Si bien la podemos obtener con un docuemnt.getElementById(), no se recomienda usar esto en Vue porque las referencias obtenidas de esta forma puede perderse en cualquier momento. Vue puede estar reconstruyendo el componente en cualquier momento por lo cual si busco un campo, ese campo la proxima vez que Vue redibuje la página puede cambiar por otro nuevo.
-    En su lugar se recomienda usar el evento Event con su propiedad "target"
-    El objeto Event tiene mucha info sobre los eventos (qué tipo de evento es; qué elemento lo disparó; si es un evento de mouse, dónde estaba el cursos de mouse; si es un evento de teclado qué tecla se apretó)
 
-    const input = ev.target; Esto sería la referencia del input
-    Con la referencia del input file, podemos obtener los archivos que seleccionar usando la propiedad "files", que conteien u "filelist".
-    FileList es una clase que, en esencia es un array de obetos File.
-    editData.value.photo = ev.target.files; ===> Esto sería un array
-
-    Como nosotros sabemos que nuestro input no tiene la propiedad "multiple", solo puede contener un único arhcivo. Por lo que podemos hard-codear el [0]
-    editData.value.photo = ev.target.files[0];
-    */
     editData.value.photo = ev.target.files[0]
     // console.log("Archivo", editData.value.photo)
 
@@ -54,17 +40,11 @@ async function handleFileSelection(ev) {
     // Con este objetivo en mente instanciamos la clase FileReader. FileReader es una clase propia de JS que permite leer archivos
     const reader = new FileReader()
 
-    // Como sucede con otras APIs (por ejemplo, XHR), antes de leer el archivo tenemos que configurar lo que queremos que se haga al completarse la lectura
     reader.addEventListener('load', function(){
-        // Guardamos el resultado de la lectura
+        // guardamos el resultado de la lectura
         editData.value.photoPreview = reader.result // en la propiedad 'result' del reader nosotros vamos a tener lo que se haya leído
         console.log(editData.value.photoPreview)
     })
-
-    // Leemos el archivo
-    // Como queremos usarlo para el "src" de una etiqueta <img>, necesitamos tener el archivo con un formato de URL. Como no tenemos una ruta para poner porque nuestro archivo es local, vamos a usar una "data URL".
-    // Una "data URL" es una URL que utiliza el protocolo "data:" (en vez de HTTP o HTTPS), y contiene un archivo codificado como string (generalmente, en base64)
-    // base64 es un formato de cifrado reversible que transforma cualquier tipo de datos en una representación como texto. Se usa para transformar archivos de cualquier tipo en texto 
 
     reader.readAsDataURL(editData.value.photo)
 

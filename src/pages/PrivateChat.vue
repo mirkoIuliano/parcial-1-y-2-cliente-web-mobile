@@ -1,6 +1,3 @@
-<!-- 
-A este archivo se entra cliqueando en chat privado y en la url se enceuntra el :id del user del cual es el chat
--->
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
@@ -58,8 +55,7 @@ async function handleSubmit() {
         // por ultimo borramos el input del mensaje
         newMessage.value.text = ''
     } catch (error) {
-        
-        // TODO
+
         console.log("Error", error)
     }
 }

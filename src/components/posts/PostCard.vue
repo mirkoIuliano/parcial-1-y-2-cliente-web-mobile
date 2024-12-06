@@ -20,19 +20,19 @@ const router = useRouter()
 
 async function handleComment (postId, user_comment )
 {
-    // Establecemos el estado de carga solo para este post. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
+    // establecemos el estado de carga solo para este post. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
     if(loading.value) return // evita múltiples clics mientras se envía
-    // if (!user_comment.trim()) return // esto hace que no se permitan comentarios vacíos
+    if (!user_comment.trim()) return // esto hace que no se permitan comentarios vacíos
 
     console.log("mandando comentario...")
 
-    // Con el '?.' se encarga de que, solo se encadena si el valor anterior no es null o undefined (osea si hay un valor en serio)
+    // con el '?.' se encarga de que, solo se encadena si el valor anterior no es null o undefined (osea si hay un valor en serio)
     if (!props.loggedUser?.id){ // si el usuario que quiere comentar no está autenticado:
         alert("Para comentar es necesario iniciar sesión primero")
         router.push('/iniciar-sesion')
     } 
     
-    // Establecemos el estado de carga solo para este post
+    // establecemos el estado de carga solo para este post
     loading.value = true
 
     try {

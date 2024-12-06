@@ -83,8 +83,8 @@ const handleSubmit = async () => {
     // TODO: validaciones de archivo (que sea imagen, cuan pesado es, etc)
     /*---------- Fin de validaciones ----------*/
 
-    // Preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
-    if(loading.value) return // Si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
+    // preguntamos que si ya está cargando, que no haga nada. Esto lo hacemos para que si se cliquea el btn no lo puedan volver a cliquear varias veces seguidas
+    if(loading.value) return // si sigue cargando y apretan los manda al return de una así no se hacen muchas peticiones al pepe
 
     loading.value = true
 

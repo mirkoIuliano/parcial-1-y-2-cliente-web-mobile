@@ -58,7 +58,6 @@ function handleSubmit(){
         ...newPost.value, // le pasamos a esta función un objeto con todos los valores de la variable newPost 
     })
     
-
     // cuando termina todo el proceso de guardar el nuevo posteo borramos los dos campos
     newPost.value.book_title = ''
     newPost.value.review = ''
