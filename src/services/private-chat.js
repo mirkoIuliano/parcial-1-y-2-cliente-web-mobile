@@ -1,60 +1,5 @@
-import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore";
-import { db } from "./firebase";
-
-/*
-# Estructura del chat privado en Firestore
-Dentro de los datos de un chat privado, hay 2 estructuras "complejas" (complejas es que es más de un solo valor o que un string o un entero) de data que queremos almacenar:
-
-- Los usuarios participantes (en nuestro caso, siempre van a ser 2).
-- Los mensajes (pueden ser X).
-
-¿Cómo nos conviene representar esa data en Firestore?
-https://firebase.google.com/docs/firestore/manage-data/structure-data?hl=es-419
-
-A partir de ese documento de guía de Firestore, podemos concluir que las estructuras que
-nos conviene utilizar son:
-
-- Para los usuarios, vamos a usar un "mapa". Un mapa es, básicamente, un objeto común de JS.
-- Para los mensajes, vamos a usar una subcollection.
-
-La estructura va a quedar algo así:
-[C] => Collection
-[D] => Document
-
-[C] private-chats {
-    [D] idChat1 {
-        users: {
-            [idUser1]: true,
-            [idUser2]: true,
-        }
-
-        [C] messages {
-            [D] idMessage1 {
-                user_id: ...,
-                text: ...,
-                created_at: ...,
-            }
-
-            ...
-        }
-    }
-
-    ...
-}
-
-Tenemos una Collection de chat privados
-En su interior va a teber como Document un idChat1
-Dentro va a tener una propiedad de users, que va a ser un mapa que va a tener como vlaves los ids de los usuarios participantes 
-Y dentro va a tener una subcollection messages
-Que dentro va a tener un Document con el id de cada mensaje, que va a tener los datos de quien lo mandó (user_id), el texto (text) y la fecha de creació (created_at)
-
-
-
-Nota: Observen que en el mapa de los usuarios los ids van a ser las *claves* y no los valores.
-*/
-
-
-
+import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, where } from "firebase/firestore"
+import { db } from "./firebase"
 
 /** 
  * Contiene la lista de los docuemntos de chats privados.  
@@ -104,13 +49,6 @@ function putInCache(key, docuement) {
 function retrieveFromCache(key) {
     return privateChatCache[key] || null // retorna esa clave o null, en el caso de que no exista
 }
-/*
-min 43:30
-Esto que hacemos es guardar el caché solo en memoria, es decir, no lo estamos persistiendo en ningún lado, una vez que el usuario refresca el caché se vacía
-Podríamos hacer que quede si lo hacemos con localStorage o con indexeddb
-*/
-
-
 
 /**
  * 
@@ -118,20 +56,23 @@ Podríamos hacer que quede si lo hacemos con localStorage o con indexeddb
  * @param {string} receiverId 
  * @returns {Promise<DocumentReferece>} 
 */
-// cremos esta función ya que tanto para guardar los mensajes como para leer los mensajes vamos a necestiar leer el docuemtno del chat privado. Esta función va a buscar el documento o lo crea en caso de no existir
+
+// Cremos esta función ya que tanto para guardar los mensajes como para leer los mensajes vamos a necestiar leer el docuemtno del chat privado. Esta función va a buscar el documento o lo crea en caso de no existir
 async function getPrivateChatDocument(senderId, receiverId) {
+
     // Antes de buscar vamos a preguntar si tenemos la conversación en el caché
     const cacheKey = getCacheKey(senderId, receiverId) // obtengo la calve del caché en base a senderId y receiverId
-    // luego obtengo el documento
+
+    // Luego obtenemos el documento
     const cacheDoc = retrieveFromCache(cacheKey)
 
-    // si tengo el docuemnto en el caché retornamos el cacheDoc que se encentrá allí
+    // Si tenemos el docuemnto en el caché retornamos el cacheDoc que se encuntra allí
     if (cacheDoc){
         console.log("Recuperando el documento del chat privado del caché")
         return cacheDoc
     }
+
     console.log("Buscando el documento del chat privado en Firestore")
-    
 
     const chatCollectionRef = collection(db, 'private-chats')
     
@@ -149,17 +90,21 @@ async function getPrivateChatDocument(senderId, receiverId) {
     
     if(chatSnapshot.empty) // si el snapshot está vacío creamos un docuemtno porque no encontramos un document que tenga los mismos senderId y receiverId. Como no encontró significa que es un chat privado nuevo y que se tiene que crear un nuevo documento
     {
+
         chatDoc = await addDoc(chatCollectionRef, {
+
             users: {
                 [senderId] : true,
                 [receiverId] : true,
             }
+
         })
+
     } else {
         chatDoc = chatSnapshot.docs[0] // chatDoc va a ser el primero que se haya encontrado
     }
 
-    // Antes de retornar eñ chatDoc, si lo tuvimos que buscar al docuemtno porque no lo teníamos en el caché, guardamos el docuemnto en el caché
+    // Antes de retornar el chatDoc, si lo tuvimos que buscar al docuemtno porque no lo teníamos en el caché, guardamos el docuemnto en el caché
     putInCache(cacheKey, chatDoc) 
 
     return chatDoc

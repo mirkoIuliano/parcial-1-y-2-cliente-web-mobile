@@ -18,11 +18,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// creamos la variable db, que inicia la conexión con Firestore y exporta la referencia a la base. Esta referencia va a ser necesaria para todas las acciones que yo quiero hacer contra la base de datos
+// Creamos la variable db, que inicia la conexión con Firestore y exporta la referencia a la base. Esta referencia va a ser necesaria para todas las acciones que yo quiero hacer contra la base de datos
 export const db = getFirestore(app);
 
-// exportamos la referencia al servicio de autenticación de Firebase
+// Exportamos la referencia al servicio de autenticación de Firebase
 export const auth = getAuth(app)
 
-// exportamos la referencia al servicio de Storage
+// Exportamos la referencia al servicio de Storage
 export const storage = getStorage(app)

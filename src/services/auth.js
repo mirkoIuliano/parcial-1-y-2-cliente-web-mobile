@@ -1,4 +1,4 @@
-// este archivo se encarga de la autenticación al iniciar sesión
+// Este archivo se encarga de la autenticación al iniciar sesión
 
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth"
 import { auth } from "./firebase"
@@ -179,7 +179,7 @@ export async function editMyProfile({displayName, bio}) {
 
     } catch (error) {
         console.error('[auth.js editMyProfile] Error al tratar de editar el perfil: ', error)
-        throw error // creo que ponemos el 'throw error' porque cuando hacemos esto después podemos manejar el error en el componente
+        throw error
     }
 }
 

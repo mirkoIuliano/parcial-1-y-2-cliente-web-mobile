@@ -1,5 +1,10 @@
 <script setup>
 import BaseHeading from '../components/BaseHeading.vue'
+import { useLoggedUser } from '../compossables/useLoggedUser'
+
+// Creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 
+const { loggedUser } = useLoggedUser()
+
 </script>
 
 <template>
@@ -13,6 +18,7 @@ import BaseHeading from '../components/BaseHeading.vue'
             </p>
 
             <router-link 
+                v-if="loggedUser.id == null"
                 to="/registrarse" 
                 class="mt-6 inline-block bg-cyan-700 text-white px-6 py-3 rounded-md text-lg font-medium hover:bg-cyan-800 focus:bg-cyan-800 transition-colors"
             > Crear Cuenta </router-link>

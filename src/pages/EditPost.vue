@@ -24,6 +24,7 @@ const editPost = ref({
     book_title: "Cargando el titutlo del libro...",
     review: "Cargando reseña...",
     post_image: null,
+    post_imageURL: null,
 })
 
 // el mensaje de error va a estar en la siguiente variable
