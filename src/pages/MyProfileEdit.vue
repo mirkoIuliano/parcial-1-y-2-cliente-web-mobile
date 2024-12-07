@@ -52,7 +52,7 @@ const handleSubmit = async () => {
         console.error(['[UserProfile]'], error)
     }
     
-    successMessage.value = "¡Se actaulizó la foto de perfil con éxito!"
+    successMessage.value = "¡Se actaulizó el perfil con éxito!"
     errorMessage.value = ""
     // cuando termine ponemos el loading en false de vuelta
     loading.value = false

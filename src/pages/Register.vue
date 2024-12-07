@@ -23,6 +23,10 @@ async function handleSubmit(){
 
     /*---------- Validaciones ----------*/
     // primero validamos que las contraseñas coincidan
+    if (!newUser.value.email.length) {
+        return errorMessage.value = 'El email es obligatorio'
+    }
+
     if (newUser.value.password !== repeatedPassword.value) {
         errorMessage.value = 'Las contraseñas ingresadas no son idénticas';
         return
