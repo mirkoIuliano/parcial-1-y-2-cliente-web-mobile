@@ -1,7 +1,7 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import BaseHeading from '../components/BaseHeading.vue'
-import { useLoggedUser } from '../compossables/useLoggedUser'
+import { useLoggedUser } from '../composables/useLoggedUser'
 import { useRoute, useRouter } from 'vue-router'
 import { getPostById, editMyPost } from '../services/public-posts'
 import NoPhoto from '/imgs/no-photo.png'
@@ -32,6 +32,9 @@ const errorMessage = ref('')
 
 // el mensaje de exito se va a estar en la siguiente variable
 const successMessage = ref("")
+
+// contador de caracteres. Usamos computed que sirve para crear propiedades copmputadas, que son valores derivados basados en otros datos reactivos. computed() permite definir una función que devuelve un valor derivado. Vue automáticamente recalcula ese valor cuando detecta que alguna de las dependencias usadas en la función ha cambiado
+const characterCounter = computed(() => editPost.value.review.length)
 
 onMounted(async () => {
 
@@ -131,7 +134,7 @@ const handleSubmit = async () => {
         </div>
 
         <div class="mb-5">
-            <p class="block mb-2 text-lg font-semibold text-slate-700">Imagen actual</p>
+            <p class="block mb-2 text-lg font-semibold text-slate-700">Imagen de referencia del libro actual</p>
             <div class="mb-5">
                 <img
                     :src="editPost.post_imageURL || NoPhoto"
@@ -150,7 +153,20 @@ const handleSubmit = async () => {
         </div>
 
         <div class="mb-5">
-            <label for="review" class="block mb-2 text-lg font-semibold text-slate-700">Reseña</label>
+            <div class="flex flex-row-reverse items-center justify-between mb-2">
+                <div class="mr-4 text-sm">
+                    <p :class="{
+                        'text-red-500 font-semibold': characterCounter < 200 || characterCounter > 2000,
+                        'text-green-500 font-semibold': characterCounter >= 200 && characterCounter <= 2000
+                    }">
+                        Caracteres: {{ characterCounter }}
+                    </p>
+                </div>
+                <div>
+                    <label for="review" class="block text-lg font-semibold text-slate-700">Reseña</label>
+                    <p class="text-sm text-slate-500">(mínimo 200 caracteres y máximo 2000)</p>
+                </div>
+            </div>
             <textarea 
                 id="review"
                 class="px-4 py-2 border border-slate-300 rounded-md w-full h-56 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"

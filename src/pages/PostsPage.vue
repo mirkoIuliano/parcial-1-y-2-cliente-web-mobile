@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { getPublicPosts, subscribeToComments } from '../services/public-posts'
 import PostCard from '../components/posts/PostCard.vue'
-import { useLoggedUser } from '../compossables/useLoggedUser'
+import { useLoggedUser } from '../composables/useLoggedUser'
 import NoPostsYet from '/imgs/no-posts-yet.png'
 import BaseHeading from '../components/BaseHeading.vue'
 

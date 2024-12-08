@@ -66,8 +66,8 @@ async function handleSubmit(){
 
     <!-- Mensaje de error -->
     <div v-if="errorMessage" class="text-red-500 mb-4">
-            {{ errorMessage }}
-        </div>
+        {{ errorMessage }}
+    </div>
 
     <button type="submit" class="w-full bg-slate-800 text-white py-2 px-4 rounded-md font-medium text-lg hover:bg-slate-700 focus:bg-slate-700 transition-colors duration-200">{{ !loading ? "Ingresar" : "Iniciando sesión..." }}</button>
 

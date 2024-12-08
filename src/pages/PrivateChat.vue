@@ -1,11 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import { useUser } from '../compossables/useUser';
-import { useLoggedUser } from '../compossables/useLoggedUser';
-import { savePrivateChatMessage, subscribeToPrivateChatMessages } from '../services/private-chat';
-import { formatDate } from '../helpers/date';
-import BaseHeading from '../components/BaseHeading.vue';
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useUser } from '../composables/useUser'
+import { useLoggedUser } from '../composables/useLoggedUser'
+import { savePrivateChatMessage, subscribeToPrivateChatMessages } from '../services/private-chat'
+import { formatDate } from '../helpers/date'
+import BaseHeading from '../components/BaseHeading.vue'
 
 const route = useRoute()
 

@@ -1,9 +1,9 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
 import ProfileData from '../components/profile/ProfileData.vue';
-import { useUser } from '../compossables/useUser';
+import { useUser } from '../composables/useUser';
 import PostCard from '../components/posts/PostCard.vue';
-import { useLoggedUser } from '../compossables/useLoggedUser';
+import { useLoggedUser } from '../composables/useLoggedUser';
 import { getPostsByUserId, subscribeToComments } from '../services/public-posts';
 import { onMounted, ref } from 'vue';
 import BaseHeading from '../components/BaseHeading.vue';
@@ -18,23 +18,22 @@ const { loggedUser } = useLoggedUser()
 
 const { user, loading } = useUser(route.params.id) // con useUser conseguimos los datos del usuario especificado por el route.params.id
 
-onMounted(async () => {
+const fetchUserProfile = async (userId) => {
+    loading.value = true
 
     // si entramos al perfil del usuario autenticado lo reenviamos a su perfil (/mi-perfil). No tiene sentido que el propio usuario pueda entrar al UserProfile de él mismo
-    if (route.params.id == loggedUser.value.id) {
+    if (userId == loggedUser.value.id) {
         router.push('/mi-perfil')
         return console.log("son la misma perosna")
     }
 
-    loading.value = true
-
     // traemos todos los posteos del usuario con getPostsByUserId
-    posts.value = await getPostsByUserId(route.params.id) // guardamos en el el array posts[] todas las publicaciones del usuario
+    posts.value = await getPostsByUserId(userId) // guardamos en el el array posts[] todas las publicaciones del usuario
 
     if (posts.value == null) {
         return console.log("no tiene posteos")
     }
-
+    
     // recorremos el array posts con un forEach
     posts.value.forEach((post) => {  
         // en cada post nos suscribimos a los comentarios para poder ver los cometnarios nuevos cuando se actualizan  
@@ -46,6 +45,12 @@ onMounted(async () => {
         )
     })
 
+    loading.value = false
+
+} 
+
+onMounted(async () => {
+    fetchUserProfile(route.params.id)
 }) 
 
 </script>

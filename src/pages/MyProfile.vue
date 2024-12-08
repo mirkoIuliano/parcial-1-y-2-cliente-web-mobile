@@ -3,11 +3,11 @@ import { onMounted, ref } from 'vue'
 import { getPostsByUserId, subscribeToComments } from '../services/public-posts'
 import ProfileData from '../components/profile/ProfileData.vue'
 import PostCard from '../components/posts/PostCard.vue'
-import { useLoggedUser } from '../compossables/useLoggedUser'
+import { useLoggedUser } from '../composables/useLoggedUser'
 import BaseHeading from '../components/BaseHeading.vue'
 import NoPostsYet from '/imgs/no-posts-yet.png'
 
-// creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 
+// creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de composables 
 const { loggedUser } = useLoggedUser()
 
 const loading = ref(false)

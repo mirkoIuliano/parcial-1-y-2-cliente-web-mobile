@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import {savePulicPost} from '../services/public-posts'
-import {useRouter} from 'vue-router'
+import { useRouter } from 'vue-router'
 import BaseHeading from '../components/BaseHeading.vue'
 
 const router = useRouter()
@@ -16,6 +16,8 @@ const newPost = ref({
 // el mensaje de error va a estar en la siguiente variable
 const errorMessage = ref('')
 
+// contador de caracteres. Usamos computed que sirve para crear propiedades copmputadas, que son valores derivados basados en otros datos reactivos. computed() permite definir una función que devuelve un valor derivado. Vue automáticamente recalcula ese valor cuando detecta que alguna de las dependencias usadas en la función ha cambiado
+const characterCounter = computed(() => newPost.value.review.length)
 
 function handleFileSelection(ev){
     // guardamos en post_image el archivo seleccionado
@@ -96,11 +98,26 @@ function handleSubmit(){
             >
         </div>
 
+        
+
         <div class="mb-5">
-            <label for="review" class="block mb-2 text-lg font-semibold text-slate-700">Reseña</label>
+            <div class="flex flex-row-reverse items-center justify-between mb-2">
+                <div class="mr-4 text-sm">
+                    <p :class="{
+                        'text-red-500 font-semibold': characterCounter < 200 || characterCounter > 2000,
+                        'text-green-500 font-semibold': characterCounter >= 200 && characterCounter <= 2000
+                    }">
+                        Caracteres: {{ characterCounter }}
+                    </p>
+                </div>
+                <div>
+                    <label for="review" class="block text-lg font-semibold text-slate-700">Reseña</label>
+                    <p class="text-sm text-slate-500">(mínimo 200 caracteres y máximo 2000)</p>
+                </div>
+            </div>
             <textarea 
                 id="review"
-                class="px-4 py-2 border border-slate-300 rounded-md w-full h-32 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                class="px-4 py-2 border border-slate-300 rounded-md w-full h-56 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                 placeholder="Comparte tu opinión sobre el libro..."
                 v-model="newPost.review"
             ></textarea>

@@ -1,8 +1,8 @@
 <script setup>
 import BaseHeading from '../components/BaseHeading.vue'
-import { useLoggedUser } from '../compossables/useLoggedUser'
+import { useLoggedUser } from '../composables/useLoggedUser'
 
-// creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de compossables 
+// creamos una variable 'loggedUser', que guarde el resultado de la función componible useLoggedUser() de composables 
 const { loggedUser } = useLoggedUser()
 
 </script>
